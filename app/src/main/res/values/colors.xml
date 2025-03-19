@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="bg_play">#FF0000</color> <!-- Raudona -->
+    <color name="bg_upgrades">#00FF00</color> <!-- Žalia -->
+    <color name="bg_rebirth">#0000FF</color> <!-- Mėlyna -->
+    <color name="bg_settings">#FFFF00</color> <!-- Geltona -->
 </resources>

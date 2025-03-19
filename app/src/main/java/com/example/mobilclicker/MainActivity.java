@@ -12,6 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
     AppDatabase _db;
@@ -22,16 +26,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
 
+        //Nustatome ikonas į default spalvas
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setItemIconTintList(null);
 
-        });
-
+        //Senų mygtuku nustatymas
         _button = findViewById((R.id.button));
         _textview = findViewById(R.id.textview);
         _db = AppActivity.getDatabase();
@@ -60,5 +61,41 @@ public class MainActivity extends AppCompatActivity {
                 // call update points here
             }
         });
+
+
+
+
+        //Menu navigacija
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment selectedFragment = null;
+
+            if (item.getItemId() == R.id.nav_play) {
+                fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                return true;
+            } else if (item.getItemId() == R.id.nav_upgrades) {
+                selectedFragment = new UpgradesFragment();
+            } else if (item.getItemId() == R.id.nav_rebirth) {
+                selectedFragment = new RebirthFragment();
+            } else if (item.getItemId() == R.id.nav_settings) {
+                selectedFragment = new SettingsFragment();
+            }
+
+            if (selectedFragment != null) {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, selectedFragment)
+                        .addToBackStack(null) // Leidžia grįžti atgal į Play ekraną
+                        .commit();
+            }
+
+            return true;
+        });
+
+        // Automatiškai nustatome Play ekraną kaip pradinį
+        if (savedInstanceState == null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_play);
+        }
+
+
     }
 }
