@@ -14,7 +14,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
-
+    AppDatabase _db;
+    UpgradeDAO _upgradeDAO;
     Button _button;
     TextView _textview;
     int score = 0;
@@ -30,15 +31,31 @@ public class MainActivity extends AppCompatActivity {
 
 
         });
+
         _button = findViewById((R.id.button));
         _textview = findViewById(R.id.textview);
+        _db = AppActivity.getDatabase();
+        _upgradeDAO = _db.upgradeDAO();
+
+        // temp upgrade
+
+        if (_upgradeDAO.getUpgradeByName("Click Multiplier") == null) {
+            Upgrade upgrdad = new Upgrade(0,"Click Multiplier",0,0.1,50);
+            _upgradeDAO.insert(upgrdad);
+        }
+
+        _upgradeDAO.incrementUpgrade(0);
+        Upgrade _upgdr = _upgradeDAO.getUpgradeByName("Click Multiplier");
+        Log.w("db", "Upgrade " + _upgdr.getName() +" "+ _upgdr.getAmount() +" "+ _upgdr.getBaseValue());
+        // temp upgrade
+
         _button.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
 
-                _textview.setText("" + score++); // (""+score) works, (score) doesn't
+                _textview.setText("" + ++score); // (""+score) works, (score) doesn't
                 Log.i("i","onclick " + score); // onClick
                 // call update points here
             }
