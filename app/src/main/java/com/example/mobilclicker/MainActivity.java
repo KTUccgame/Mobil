@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     Button _button;
     TextView _textview;
     int _score = 0;
+    int clickpower=1;
 
     private UpgradesFragment upgradesFragment; // Add a reference to UpgradesFragment
     private RebirthFragment rebirthFragment;   // Add a reference to RebirthFragment
@@ -47,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
         Log.w("db", "Upgrade " + tempUpgrade.getName() + " " + tempUpgrade.getAmount() + " " + tempUpgrade.getBaseValue());
 
         _button.setOnClickListener(view -> {
-            _textview.setText("" + ++_score);
+            addPoint();
+            _textview.setText("" +_score);
             Log.i("i", "onclick " + _score);
         });
 
@@ -92,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Point management methods
     public void addPoint() {
-        _score++;
+        _score=_score+clickpower;
         updateScore();
     }
 

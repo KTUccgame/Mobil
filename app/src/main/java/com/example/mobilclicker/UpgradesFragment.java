@@ -22,6 +22,7 @@ public class UpgradesFragment extends Fragment {
     private int generatorsOwned = 0;
     private TextView generatorPriceText;
     private Button pointGeneratorButton;
+    private Button upgradeButton;
     public UpgradesFragment() {
         // Reikalingas tuščias konstruktorius
     }
@@ -31,6 +32,7 @@ public class UpgradesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_upgrades, container, false);
         mainActivity = (MainActivity) getActivity();
         pointGeneratorButton = view.findViewById(R.id.point_generator_button);
+        upgradeButton=view.findViewById(R.id.point_upgrade_button);
 
         // Pakrauname išsaugotus duomenis
         loadGeneratorData();
@@ -56,6 +58,19 @@ public class UpgradesFragment extends Fragment {
                 }
             }
         });
+        upgradeButton.setText("Click Upgrade ("+ generatorPrice+ " points)");
+        upgradeButton.setOnClickListener(v -> {
+            if (mainActivity.get_score()>=generatorPrice){
+                mainActivity.subtractPoints(generatorPrice);
+                //mainActivity._db.upgradeDAO().incrementUpgrade(2);
+                //Log.w("db", "" + mainActivity._db.upgradeDAO().getUpgradeById(2).getAmount()*10);
+                //generatorsOwned = mainActivity._db.upgradeDAO().getUpgradeById(2).getAmount();
+                //generatorPrice = mainActivity._db.upgradeDAO().getUpgradeById(2).getAmount() * 10;
+                upgradeButton.setText("Click upgrade (" + generatorPrice + " points)");
+                mainActivity.clickpower++;
+            }
+        });
+
         return view;
     }
     private void startPointGeneration() {
