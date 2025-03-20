@@ -1,17 +1,12 @@
 package com.example.mobilclicker;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -23,49 +18,41 @@ public class MainActivity extends AppCompatActivity {
     Button _button;
     TextView _textview;
     int score = 0;
+
+    private UpgradesFragment upgradesFragment; // Add a reference to UpgradesFragment
+    private RebirthFragment rebirthFragment;   // Add a reference to RebirthFragment
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Nustatome ikonas į default spalvas
+        // Initialize BottomNavigationView
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setItemIconTintList(null);
 
-        //Senų mygtuku nustatymas
-        _button = findViewById((R.id.button));
+        // Button and text initialization
+        _button = findViewById(R.id.button);
         _textview = findViewById(R.id.textview);
         _db = AppActivity.getDatabase();
         _upgradeDAO = _db.upgradeDAO();
 
-        // temp upgrade
-
+        // Temporary upgrade logic
         if (_upgradeDAO.getUpgradeByName("Click Multiplier") == null) {
-            Upgrade upgrdad = new Upgrade(0,"Click Multiplier",0,0.1,50);
-            _upgradeDAO.insert(upgrdad);
+            Upgrade upgrade = new Upgrade(0, "Click Multiplier", 0, 0.1, 50);
+            _upgradeDAO.insert(upgrade);
         }
 
         _upgradeDAO.incrementUpgrade(0);
-        Upgrade _upgdr = _upgradeDAO.getUpgradeByName("Click Multiplier");
-        Log.w("db", "Upgrade " + _upgdr.getName() +" "+ _upgdr.getAmount() +" "+ _upgdr.getBaseValue());
-        // temp upgrade
+        Upgrade tempUpgrade = _upgradeDAO.getUpgradeByName("Click Multiplier");
+        Log.w("db", "Upgrade " + tempUpgrade.getName() + " " + tempUpgrade.getAmount() + " " + tempUpgrade.getBaseValue());
 
-        _button.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-
-                _textview.setText("" + ++score); // (""+score) works, (score) doesn't
-                Log.i("i","onclick " + score); // onClick
-                // call update points here
-            }
+        _button.setOnClickListener(view -> {
+            _textview.setText("" + ++score);
+            Log.i("i", "onclick " + score);
         });
 
-
-
-
-        //Menu navigacija
+        // Navigation menu logic
         bottomNavigationView.setOnItemSelectedListener(item -> {
             FragmentManager fragmentManager = getSupportFragmentManager();
             Fragment selectedFragment = null;
@@ -74,9 +61,16 @@ public class MainActivity extends AppCompatActivity {
                 fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 return true;
             } else if (item.getItemId() == R.id.nav_upgrades) {
-                selectedFragment = new UpgradesFragment();
+                if (upgradesFragment == null) {
+                    upgradesFragment = new UpgradesFragment();
+                }
+                selectedFragment = upgradesFragment;
             } else if (item.getItemId() == R.id.nav_rebirth) {
-                selectedFragment = new RebirthFragment();
+                if (rebirthFragment == null) {
+                    rebirthFragment = new RebirthFragment();
+                    rebirthFragment.setUpgradesFragment(upgradesFragment); // Pass reference
+                }
+                selectedFragment = rebirthFragment;
             } else if (item.getItemId() == R.id.nav_settings) {
                 selectedFragment = new SettingsFragment();
             }
@@ -84,18 +78,51 @@ public class MainActivity extends AppCompatActivity {
             if (selectedFragment != null) {
                 fragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)
-                        .addToBackStack(null) // Leidžia grįžti atgal į Play ekraną
+                        .addToBackStack(null) // Allow back navigation
                         .commit();
             }
 
             return true;
         });
 
-        // Automatiškai nustatome Play ekraną kaip pradinį
+        // Set initial screen to Play
         if (savedInstanceState == null) {
             bottomNavigationView.setSelectedItemId(R.id.nav_play);
         }
+    }
 
+    // Point management methods
+    public void addPoint() {
+        score++;
+        updateScore();
+    }
 
+    public void addPoint(int amount) {
+        score += amount;
+        updateScore();
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void subtractPoints(int amount) {
+        score -= amount;
+        updateScore();
+    }
+
+    private void updateScore() {
+        _textview.setText("" + score);
+    }
+
+    // Reset score and stop point generation
+    public void resetScore() {
+        score = 0;  // Reset score
+        updateScore();  // Update the UI
+
+        // Stop point generation from UpgradesFragment
+        if (upgradesFragment != null) {
+            upgradesFragment.stopPointGeneration();
+        }
     }
 }
