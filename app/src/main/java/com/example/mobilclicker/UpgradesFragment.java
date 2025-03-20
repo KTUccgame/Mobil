@@ -1,5 +1,6 @@
 package com.example.mobilclicker;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,6 +23,9 @@ public class UpgradesFragment extends Fragment {
     private int generatorsOwned = 0;
     private TextView generatorPriceText;
     private Button pointGeneratorButton;
+
+    private Button editButton;
+
     public UpgradesFragment() {
         // Reikalingas tuščias konstruktorius
     }
@@ -31,6 +35,14 @@ public class UpgradesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_upgrades, container, false);
         mainActivity = (MainActivity) getActivity();
         pointGeneratorButton = view.findViewById(R.id.point_generator_button);
+        editButton = view.findViewById(R.id.editButton);
+
+
+        editButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this.getContext(), EditActivity.class);
+            startActivity(intent);
+        });
+
 
         // Pakrauname išsaugotus duomenis
         loadGeneratorData();
@@ -106,4 +118,7 @@ public class UpgradesFragment extends Fragment {
             startPointGeneration();  // Atkuriame generavimo funkcionalumą, jei generatorius buvo aktyvus
         }
     }
+
+
+
 }
