@@ -18,6 +18,7 @@ public class SettingsFragment extends Fragment {
     public SettingsFragment() {
         // Reikalingas tuščias konstruktorius
     }
+    //1
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
