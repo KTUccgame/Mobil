@@ -48,6 +48,7 @@ public class UpgradesFragment extends Fragment {
                 //Log.w("db", " " + mainActivity._db.upgradeDAO().getUpgradeByName("Click Multiplier").getId());
                 // ASDFGHJK
                 generatorsOwned = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount();
+
                 generatorPrice = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount() * 10 + 10;
                 pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
                 // Išsaugome duomenis
