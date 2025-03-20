@@ -39,7 +39,6 @@ public class RebirthFragment extends Fragment {
     public void setUpgradesFragment(UpgradesFragment upgradesFragment) {
         this.upgradesFragment = upgradesFragment;
     }
-
     private void resetGameData() {
         if (mainActivity != null) {
             // Clear SharedPreferences

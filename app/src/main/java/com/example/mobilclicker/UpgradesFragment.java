@@ -45,7 +45,7 @@ public class UpgradesFragment extends Fragment {
                 //Log.w("db", " " + mainActivity._db.upgradeDAO().getUpgradeByName("Click Multiplier").getId());
                 // ASDFGHJK
                 generatorsOwned = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount();
-                generatorPrice = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount() * 10;
+                generatorPrice = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount() * 10+10 ;
                 pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
                 // Išsaugome duomenis
                 saveGeneratorData();
@@ -76,7 +76,7 @@ public class UpgradesFragment extends Fragment {
 
         Upgrade upgrade = mainActivity._db.upgradeDAO().getUpgradeById(1);
         upgrade.setBaseCost(10); // Reset cost
-        upgrade.setAmount(1);    // Reset amount
+        upgrade.setAmount(0);    // Reset amount
         mainActivity._db.upgradeDAO().updateUpgrade(upgrade); // Save changes
     }
 

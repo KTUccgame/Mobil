@@ -11,10 +11,8 @@ import java.util.List;
 public interface UpgradeDAO {
     @Insert
     void insert(Upgrade upgrade);
-
     @Update
     void updateUpgrade(Upgrade upgrade);
-
     @Query("DELETE FROM upgrade")
     void deleteAll();
     @Query("SELECT * from upgrade ORDER BY upgrade_name ASC")
