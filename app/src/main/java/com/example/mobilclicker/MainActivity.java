@@ -2,7 +2,6 @@ package com.example.mobilclicker;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -17,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
     UpgradeDAO _upgradeDAO;
     Button _button;
     TextView _textview;
-    int score = 0;
+    int _score = 0;
 
     private UpgradesFragment upgradesFragment; // Add a reference to UpgradesFragment
     private RebirthFragment rebirthFragment;   // Add a reference to RebirthFragment
@@ -48,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
         Log.w("db", "Upgrade " + tempUpgrade.getName() + " " + tempUpgrade.getAmount() + " " + tempUpgrade.getBaseValue());
 
         _button.setOnClickListener(view -> {
-            _textview.setText("" + ++score);
-            Log.i("i", "onclick " + score);
+            _textview.setText("" + ++_score);
+            Log.i("i", "onclick " + _score);
         });
 
         // Navigation menu logic
@@ -93,31 +92,31 @@ public class MainActivity extends AppCompatActivity {
 
     // Point management methods
     public void addPoint() {
-        score++;
+        _score++;
         updateScore();
     }
 
     public void addPoint(int amount) {
-        score += amount;
+        _score += amount;
         updateScore();
     }
 
-    public int getScore() {
-        return score;
+    public int get_score() {
+        return _score;
     }
 
     public void subtractPoints(int amount) {
-        score -= amount;
+        _score -= amount;
         updateScore();
     }
 
     private void updateScore() {
-        _textview.setText("" + score);
+        _textview.setText("" + _score);
     }
 
     // Reset score and stop point generation
     public void resetScore() {
-        score = 0;  // Reset score
+        _score = 0;  // Reset score
         updateScore();  // Update the UI
 
         // Stop point generation from UpgradesFragment
