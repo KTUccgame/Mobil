@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -72,7 +73,13 @@ public class UpgradesFragment extends Fragment {
     public void stopPointGeneration() {
         isGeneratorActive.set(false);
         handler.removeCallbacksAndMessages(null);
+
+        Upgrade upgrade = mainActivity._db.upgradeDAO().getUpgradeById(1);
+        upgrade.setBaseCost(10); // Reset cost
+        upgrade.setAmount(1);    // Reset amount
+        mainActivity._db.upgradeDAO().updateUpgrade(upgrade); // Save changes
     }
+
     private void saveGeneratorData() {
         if (mainActivity == null) return;
         mainActivity.getSharedPreferences("upgrade_prefs", mainActivity.MODE_PRIVATE)
