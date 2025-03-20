@@ -38,11 +38,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Temporary upgrade logic
         if (_upgradeDAO.getUpgradeByName("Click Multiplier") == null) {
-            Upgrade upgrade = new Upgrade(0, "Click Multiplier", 0, 0.1, 50);
+            Upgrade upgrade = new Upgrade(0, "Click Multiplier", 0, 1, 10);
             _upgradeDAO.insert(upgrade);
         }
 
-        _upgradeDAO.incrementUpgrade(0);
+        //_upgradeDAO.incrementUpgrade(0);
         Upgrade tempUpgrade = _upgradeDAO.getUpgradeByName("Click Multiplier");
         Log.w("db", "Upgrade " + tempUpgrade.getName() + " " + tempUpgrade.getAmount() + " " + tempUpgrade.getBaseValue());
 

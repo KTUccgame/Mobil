@@ -54,8 +54,6 @@ public class RebirthFragment extends Fragment {
             // Stop point generation through upgradesFragment
             if (upgradesFragment != null) {
                 upgradesFragment.stopPointGeneration();
-            } else {
-                Toast.makeText(mainActivity, "UpgradesFragment is not available", Toast.LENGTH_SHORT).show();
             }
         }
     }
