@@ -6,11 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
-
-import com.google.android.material.snackbar.Snackbar;
 
 public class SettingsFragment extends Fragment {
     private MainActivity mainActivity;
@@ -25,8 +22,8 @@ public class SettingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         mainActivity = (MainActivity) getActivity();
 
-        Button userButton = view.findViewById(R.id.button2);
-        Button adminButton = view.findViewById(R.id.button3);
+        Button userButton = view.findViewById(R.id.profile_1_button);
+        Button adminButton = view.findViewById(R.id.profile_2_button);
 
         userButton.setOnClickListener(v -> {
             changeToUser();
@@ -46,8 +43,6 @@ public class SettingsFragment extends Fragment {
                     .clear()
                     .apply();
             Log.i("i","clicked user button");
-
-
             if(!mainActivity.isUser)
             {
                 ///////
@@ -69,7 +64,6 @@ public class SettingsFragment extends Fragment {
                     .clear()
                     .apply();
             Log.i("i","clicked admin button");
-
             if(mainActivity.isUser)
             {
                 ///////
