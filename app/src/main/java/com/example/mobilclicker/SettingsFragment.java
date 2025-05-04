@@ -17,6 +17,7 @@ public class SettingsFragment extends Fragment {
     private final String adminPW = "aa";
     private long currentProfileId = 1;
     private CheckBox soundBox, volumeBox, numberBox, fourthBox;
+
     TextView profileText;
     public SettingsFragment() {
         // empty to not break app
@@ -39,6 +40,7 @@ public class SettingsFragment extends Fragment {
         volumeBox = view.findViewById(R.id.volume_checkbox);
         numberBox = view.findViewById(R.id.number_checkbox);
         fourthBox = view.findViewById(R.id.fourth_checkbox);
+
 
         initializeProfilesIfNeeded();
         loadProfileSettings(1);
@@ -100,6 +102,7 @@ public class SettingsFragment extends Fragment {
                 fourthBox.setChecked(profile.isFourthBox());
                 mainActivity.isUser = !profile.isAdminCheck();
                 profileText.setText(profile.getName());
+                mainActivity.setCurrentProfileId(profile.getId());
             });
         }).start();
     }

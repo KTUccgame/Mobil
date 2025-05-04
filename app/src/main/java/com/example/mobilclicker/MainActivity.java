@@ -1,8 +1,13 @@
 package com.example.mobilclicker;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,12 +24,9 @@ public class MainActivity extends AppCompatActivity {
     Button _button;
     TextView _textview;
     int _score = 0;
-
     boolean isUser = true;
-
     int clickpower=1;
-
-
+    public long currentProfileId = 1;
     private UpgradesFragment upgradesFragment; // Add a reference to UpgradesFragment
     private RebirthFragment rebirthFragment;   // Add a reference to RebirthFragment
 
@@ -57,14 +59,40 @@ public class MainActivity extends AppCompatActivity {
         //_upgradeDAO.incrementUpgrade(0);
         Upgrade tempUpgrade = _upgradeDAO.getUpgradeByName("Click Multiplier");
         Log.w("db", "Upgrade " + tempUpgrade.getName() + " " + tempUpgrade.getAmount() + " " + tempUpgrade.getBaseValue());
-
+        /*
         _button.setOnClickListener(view -> {
             addPoint();
             _textview.setText("" +_score);
-
-            Log.i("i", "onclick " + _score);
-            Log.i("i", "currently is a user: " + isUser);
+            new Thread(() -> {
+                ProfileSettings profile = _profileDAO.loadAllByIds(new int[]{(int) currentProfileId}).get(0); // assuming profile 1 for now
+                if (profile.isNumberBox()) {
+                    runOnUiThread(this::clickPopup);
+                }
+            }).start();
+            //if()
+            // method here to show pop up an image + amount of points from click
         });
+        */
+        // ↓ errpr but not real error?
+        _button.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                addPoint();
+                _textview.setText("" + _score);
+
+                float touchX = event.getRawX();
+                float touchY = event.getRawY();
+
+                new Thread(() -> {
+                    ProfileSettings profile = _profileDAO.loadAllByIds(new int[]{(int) currentProfileId}).get(0);
+                    if (profile.isNumberBox()) {
+                        runOnUiThread(() -> clickPopup(touchX, touchY));
+                    }
+                }).start();
+            }
+            return false;
+        });
+
+
         // Navigation menu logic
         bottomNavigationView.setOnItemSelectedListener(item -> {
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -103,7 +131,54 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setSelectedItemId(R.id.nav_play);
         }
     }
+    /*
+    public void clickPopup()
+    {
+        TextView popup = new TextView(this);
+        popup.setText("+" + clickpower);
+        popup.setTextSize(24f);
+        popup.setTextColor(Color.YELLOW);
+        //popup.setTypeface(null, Typeface.BOLD);
+        popup.setAlpha(0f);
 
+        RelativeLayout rootLayout = findViewById(R.id.tempLayout);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        popup.setLayoutParams(params);
+
+        rootLayout.addView(popup);
+
+        popup.animate()
+                .alpha(1f)
+                .translationYBy(-100f)
+                .setDuration(700)
+                .withEndAction(() -> rootLayout.removeView(popup))
+                .start();
+    }
+    */
+    public void clickPopup(float x, float y) {
+        TextView popup = new TextView(this);
+        popup.setText("+" + clickpower);
+        popup.setTextSize(24);
+        popup.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+        popup.setAlpha(1f);
+        ViewGroup rootLayout = findViewById(android.R.id.content);
+        popup.setX(x - 50); // offset to center
+        popup.setY(y - 100); // move up a bit
+        rootLayout.addView(popup);
+        popup.animate()
+                .translationYBy(-150f)
+                .alpha(0f)
+                .setDuration(800)
+                .withEndAction(() -> rootLayout.removeView(popup))
+                .start();
+    }
+    public void setCurrentProfileId(long id) {
+        currentProfileId = id;
+    }
     // Point management methods
     public void addPoint() {
         _score=_score+clickpower;
