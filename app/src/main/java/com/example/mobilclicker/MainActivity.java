@@ -13,7 +13,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
     AppDatabase _db;
+    AppDatabase2 _db2;
     UpgradeDAO _upgradeDAO;
+    ProfileSettingsDAO _profileDAO;
     Button _button;
     TextView _textview;
     int _score = 0;
@@ -40,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
         _textview = findViewById(R.id.textview);
         _db = AppActivity.getDatabase();
         _upgradeDAO = _db.upgradeDAO();
-
+        _db2 = AppActivity.getDatabase2();
+        _profileDAO = _db2.profileDAO();
 
         // Temporary upgrade logic
         if (_upgradeDAO.getUpgradeByName("Click Multiplier") == null) {
