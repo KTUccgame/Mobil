@@ -80,6 +80,12 @@ public class SettingsFragment extends Fragment {
             prefs.edit().clear().apply();
             mainActivity.isUser = !mainActivity.isUser;
             Log.w("settings", mainActivity.isUser ? "going to user mode" : "going to admin mode");
+            new Thread(() -> {
+                ProfileSettingsDAO dao = AppActivity.db2.profileDAO();
+                ProfileSettings profile = dao.loadAllByIds(new int[]{(int) currentProfileId}).get(0);
+                profile.setAdminCheck(!mainActivity.isUser);
+                dao.updateProfile(profile);
+            }).start();
         }
     }
     private void loadProfileSettings(long profileId) {
@@ -92,7 +98,7 @@ public class SettingsFragment extends Fragment {
                 volumeBox.setChecked(profile.isVolumeBox());
                 numberBox.setChecked(profile.isNumberBox());
                 fourthBox.setChecked(profile.isFourthBox());
-                //mainActivity.isUser = !profile.isAdminCheck();
+                mainActivity.isUser = !profile.isAdminCheck();
                 profileText.setText(profile.getName());
             });
         }).start();
