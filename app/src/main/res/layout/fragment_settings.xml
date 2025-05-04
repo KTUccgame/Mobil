@@ -51,7 +51,7 @@
         app:layout_constraintTop_toBottomOf="@+id/profile_3_button" />
 
     <CheckBox
-        android:id="@+id/Sound_checkbox"
+        android:id="@+id/sound_checkbox"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginStart="24dp"
@@ -71,10 +71,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Volume_checkbox" />
+        app:layout_constraintTop_toBottomOf="@+id/volume_checkbox" />
 
     <CheckBox
-        android:id="@+id/Volume_checkbox"
+        android:id="@+id/volume_checkbox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -83,7 +83,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Sound_checkbox" />
+        app:layout_constraintTop_toBottomOf="@+id/sound_checkbox" />
 
     <CheckBox
         android:id="@+id/fourth_checkbox"
