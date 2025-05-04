@@ -15,21 +15,18 @@ public class ProfileSettings {
     private boolean soundBox;
     @ColumnInfo(name = "volumeBox")
     private boolean volumeBox;
+    @ColumnInfo(name = "numberBox")
+    private boolean numberBox;
+    @ColumnInfo(name = "fourthBox")
+    private boolean fourthBox;
 
-    /*
-    @ColumnInfo(name = "upgrade_amount")
-    private int amount;
-    @ColumnInfo(name = "upgrade_base_value")
-    private double baseValue;
-    @ColumnInfo(name = "upgrade_base_cost")
-    private double baseCost;
-*/
     public ProfileSettings(long id) {
         this.id = id;
-    }
-    public ProfileSettings(long id, @NonNull String name) {
-        this.id = id;
-        this.name = name;
+        this.name = "Profile " + (int)(id+1);
+        this.soundBox = true;
+        this.volumeBox = true;
+        this.numberBox = true;
+        this.fourthBox = true;
     }
 
     public long getId() {return id;}
@@ -37,6 +34,16 @@ public class ProfileSettings {
     @NonNull
     public String getName() {return name;}
     public void setName(@NonNull String name) {this.name = name;}
+
+    public boolean isSoundBox() {return soundBox;}
+    public void setSoundBox(boolean soundBox) {this.soundBox = soundBox;}
+    public boolean isVolumeBox() {return volumeBox;}
+    public void setVolumeBox(boolean volumeBox) {this.volumeBox = volumeBox;}
+    public boolean isNumberBox() {return numberBox;}
+    public void setNumberBox(boolean numberBox) {this.numberBox = numberBox;}
+    public boolean isFourthBox() {return fourthBox;}
+    public void setFourthBox(boolean fourthBox) {this.fourthBox = fourthBox;}
+
     /*
     public int getAmount() {return amount;}
     public void setAmount(int amount) {this.amount = amount;}
