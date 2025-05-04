@@ -1,12 +1,17 @@
 package com.example.mobilclicker;
 
+import android.animation.ObjectAnimator;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +39,22 @@ public class UpgradesFragment extends Fragment {
         pointGeneratorButton = view.findViewById(R.id.point_generator_button);
         upgradeButton=view.findViewById(R.id.point_upgrade_button);
 
+        ScrollView scrollView = view.findViewById(R.id.scrollViewer);
+        /*
+        // force trigger an animation ↓
+        scrollView.post(() -> {
+            ObjectAnimator animator = ObjectAnimator.ofInt(scrollView, "scrollY", scrollView.getScrollY() + 500);
+            animator.setDuration(5000); // 1 second scroll
+            animator.setInterpolator(new LinearInterpolator());
+            // LinearInterpolator() DecelerateInterpolator() or google the other ones :]
+            animator.start();
+        });
+        */
+        scrollView.setOnScrollChangeListener((View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) -> {
+            //view.setAlpha(1.0f - (scrollY / 1000f));
+            // on scroll, fade out the background, shows play area... not useful
+        });
+
         // Pakrauname išsaugotus duomenis
         loadGeneratorData();
         pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
@@ -42,11 +63,11 @@ public class UpgradesFragment extends Fragment {
                 mainActivity.subtractPoints(generatorPrice);
                 //generatorsOwned++;
                 //generatorPrice += 10;
-                // ASDFGHJK
+                // up dao
                 mainActivity._db.upgradeDAO().incrementUpgrade(1);
                 Log.w("db","" + mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount());
                 //Log.w("db", " " + mainActivity._db.upgradeDAO().getUpgradeByName("Click Multiplier").getId());
-                // ASDFGHJK
+                // up dao
                 generatorsOwned = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount();
 
                 generatorPrice = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount() * 10 + 10;

@@ -111,7 +111,7 @@ public class SettingsFragment extends Fragment {
             profile.setVolumeBox(volumeBox.isChecked());
             profile.setNumberBox(numberBox.isChecked());
             profile.setFourthBox(fourthBox.isChecked());
-            //profile.setAdminCheck(!mainActivity.isUser);
+            //profile.setAdminCheck(!mainActivity.isUser); not needed ... i think ...
             dao.updateProfile(profile);
         }).start();
     }
