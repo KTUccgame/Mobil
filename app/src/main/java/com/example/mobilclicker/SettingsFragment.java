@@ -1,13 +1,19 @@
 package com.example.mobilclicker;
 
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -40,7 +46,7 @@ public class SettingsFragment extends Fragment {
         volumeBox = view.findViewById(R.id.volume_checkbox);
         numberBox = view.findViewById(R.id.number_checkbox);
         fourthBox = view.findViewById(R.id.fourth_checkbox);
-
+        ImageView image = view.findViewById(R.id.imageView);
         initializeProfilesIfNeeded();
 
         loadProfileSettings(mainActivity.currentProfileId);
@@ -59,8 +65,11 @@ public class SettingsFragment extends Fragment {
             loadProfileSettings(3);
         });
         creditsButton.setOnClickListener(v -> {
-            // popup info about people who made the app
+            // popup info about people who made the appx
             // make textbox read info from .txt file?
+
+            Animation hyperspaceJump = AnimationUtils.loadAnimation(this.mainActivity, R.anim.hyperspace_jump);
+            image.startAnimation(hyperspaceJump);
         });
         adminButton.setOnClickListener(v -> {
             if(adminPW.contentEquals(adminText.getText()))
@@ -72,6 +81,53 @@ public class SettingsFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_settings, container, false);
         return view;
     }
+    private void userModeAnimation() {
+        if (mainActivity == null) return;
+        ImageView userAnimation = new ImageView(mainActivity);
+        int imageRes = mainActivity.isUser ?
+                R.drawable.play:
+                R.drawable.settings;
+        userAnimation.setImageResource(imageRes);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER
+        );
+        ViewGroup rootView = mainActivity.findViewById(android.R.id.content);
+        rootView.addView(userAnimation, params);
+        userAnimation.setAlpha(0f);
+        userAnimation.setScaleX(0.1f);
+        userAnimation.setScaleY(0.1f);
+        userAnimation.animate()
+            .alpha(1f)
+            .scaleX(0.5f)
+            .scaleY(0.5f)
+            .setDuration(300)
+            .withEndAction(() -> {
+            userAnimation.animate()
+                .alpha(0f)
+                .scaleX(1.2f)
+                .scaleY(1.2f)
+                .setDuration(300)
+                .setStartDelay(1000)
+                .withEndAction(() -> rootView.removeView(userAnimation))
+                .start();
+            })
+            .start();
+        if(soundBox.isChecked())
+        {
+            try {
+                MediaPlayer.create(mainActivity,
+                                mainActivity.isUser ?
+                                        R.raw.wood_two:
+                                        R.raw.wood_one)
+                        .start();
+            } catch (Exception e) {
+                Log.e("UserMode", "Error playing sound", e);
+            }
+        }
+
+    }
     private void toggleUserMode() {
         if (mainActivity != null) {
             SharedPreferences prefs = mainActivity.getSharedPreferences(
@@ -81,6 +137,7 @@ public class SettingsFragment extends Fragment {
             prefs.edit().clear().apply();
             mainActivity.isUser = !mainActivity.isUser;
             Log.w("settings", mainActivity.isUser ? "going to user mode" : "going to admin mode");
+            mainActivity.runOnUiThread(this::userModeAnimation);
             new Thread(() -> {
                 ProfileSettingsDAO dao = AppActivity.db2.profileDAO();
                 ProfileSettings profile = dao.loadAllByIds(new int[]{(int) currentProfileId}).get(0);
