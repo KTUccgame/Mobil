@@ -67,7 +67,7 @@
         android:layout_width="385dp"
         android:layout_height="49dp"
         android:layout_marginStart="24dp"
-        android:text="Show numbers"
+        android:text="Tap popup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"

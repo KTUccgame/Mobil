@@ -41,10 +41,9 @@ public class SettingsFragment extends Fragment {
         numberBox = view.findViewById(R.id.number_checkbox);
         fourthBox = view.findViewById(R.id.fourth_checkbox);
 
-
         initializeProfilesIfNeeded();
-        loadProfileSettings(1);
 
+        loadProfileSettings(mainActivity.currentProfileId);
 
         soundBox.setOnCheckedChangeListener((buttonView, isChecked) -> saveProfileSettings());
         volumeBox.setOnCheckedChangeListener((buttonView, isChecked) -> saveProfileSettings());

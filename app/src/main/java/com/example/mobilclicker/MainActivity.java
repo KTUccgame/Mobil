@@ -1,16 +1,24 @@
 package com.example.mobilclicker;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -85,8 +93,12 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(() -> {
                     ProfileSettings profile = _profileDAO.loadAllByIds(new int[]{(int) currentProfileId}).get(0);
                     if (profile.isNumberBox()) {
-                        runOnUiThread(() -> clickPopup(touchX, touchY));
+                        runOnUiThread(() -> {
+                            clickPopup(touchX, touchY);
+                            clickXml(touchX, touchY);
+                        });
                     }
+
                 }).start();
             }
             return false;
@@ -148,9 +160,7 @@ public class MainActivity extends AppCompatActivity {
         );
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
         popup.setLayoutParams(params);
-
         rootLayout.addView(popup);
-
         popup.animate()
                 .alpha(1f)
                 .translationYBy(-100f)
@@ -159,6 +169,47 @@ public class MainActivity extends AppCompatActivity {
                 .start();
     }
     */
+    public void clickXml(float x, float y) {
+        ImageView circle = new ImageView(this);
+        ViewGroup rootLayout = findViewById(android.R.id.content);
+        int size = (int) (30 * getResources().getDisplayMetrics().density);
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(size, size);
+        rootLayout.addView(circle, params);
+        circle.setX(x - size / 2f);
+        circle.setY(y - size / 2f);
+        AnimatedVectorDrawable morph = (AnimatedVectorDrawable)
+                ContextCompat.getDrawable(this, R.drawable.circle_morph);
+        circle.setImageDrawable(morph);
+        morph.start();
+        float angleDegrees = (float) (Math.random() * 60 - 30); // -+ left/right
+        double angleRadians = Math.toRadians(angleDegrees);
+        float v0 = 1000f; // starting upward
+        float g = 2500f;  // constant downward
+        float duration = 3.2f;
+        long animationDurationMs = (long) (duration * 500);
+        float vx = (float) (v0 * Math.sin(angleRadians));
+        float vy = (float) (-v0 * Math.cos(angleRadians)); // - is upward
+        long startTime = System.currentTimeMillis();
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, duration);
+        animator.setDuration(animationDurationMs);
+        animator.setInterpolator(null);
+        animator.addUpdateListener(animation -> {
+            float t = (System.currentTimeMillis() - startTime) / 1000f;
+            if (t > duration) t = duration;
+            float dx = vx * t;
+            float dy = vy * t + 0.5f * g * t * t;
+            circle.setX(x - size / 2f + dx);
+            circle.setY(y - size / 2f + dy);
+            circle.setAlpha(1f - (t / duration));
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                rootLayout.removeView(circle);
+            }
+        });
+        animator.start();
+    }
     public void clickPopup(float x, float y) {
         TextView popup = new TextView(this);
         popup.setText("+" + clickpower);
@@ -166,8 +217,8 @@ public class MainActivity extends AppCompatActivity {
         popup.setTextColor(getResources().getColor(android.R.color.holo_green_light));
         popup.setAlpha(1f);
         ViewGroup rootLayout = findViewById(android.R.id.content);
-        popup.setX(x - 50); // offset to center
-        popup.setY(y - 100); // move up a bit
+        popup.setX(x - 50);
+        popup.setY(y - 100);
         rootLayout.addView(popup);
         popup.animate()
                 .translationYBy(-150f)
