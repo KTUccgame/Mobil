@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:aapt="http://schemas.android.com/aapt">
+<aapt:attr name="android:drawable">
+    <vector
+        android:width="512.000000dp"
+        android:height="512.000000dp"
+        android:viewportWidth="512.000000"
+        android:viewportHeight="512.000000">
+        <group
+            android:translateY="512.000000"
+            android:scaleX="0.10000"
+            android:scaleY="-0.10000">
+            <path
+                android:fillColor="#000000"
+                android:strokeWidth="1"
+                android:pathData="M2230 4956 l0 -164 330 -7 330 -7 0 -329 0 -329 505 0 505 0 0 165 0 165 275 0 275 0 0 -275 0 -275 -165 0 -165 0 0 -505 0 -505 330 0 330 0 0 -330 0 -330 -330 0 -330 0 0 -505 0 -505 165 0 165 0 0 -275 0 -275 -275 0 -275 0 0 165 0 165 -505 0 -505 0 0 -330 0 -330 -330 0 -330 0 0 330 0 330 -505 0 -505 0 0 -165 0 -165 -275 0 -275 0 0 275 0 275 165 0 165 0 0 505 0 505 -328 0 -329 0 -6 248 c-4 136 -7 284 -7 330 l0 82 335 0 335 0 0 505 0 505 -165 0 -165 0 0 275 0 275 275 0 275 0 0 -165 0 -165 505 0 505 0 -2 333 -3 332 -165 0 -165 0 -3 -167 -2 -168 -330 0 -330 0 -2 168 -3 167 -277 3 -278 2 0 -170 0 -170 -170 0 -170 0 2 -277 3 -278 168 -3 167 -2 0 -330 0 -330 -167 -2 -168 -3 -3 -167 -2 -168 -165 0 -165 0 0 -330 0 -330 165 0 165 0 0 -170 0 -170 170 0 170 0 0 -335 0 -335 -170 0 -170 0 0 -275 0 -275 170 0 170 0 0 -170 0 -170 277 2 278 3 3 167 2 168 330 0 330 0 0 -170 0 -170 170 0 170 0 0 -165 0 -165 330 0 330 0 0 165 0 165 170 0 170 0 0 170 0 170 330 0 330 0 2 -167 3 -168 278 -3 277 -2 0 170 0 170 170 0 170 0 -2 278 -3 277 -167 3 -168 2 0 330 0 330 170 0 170 0 0 170 0 170 165 0 165 0 0 330 0 330 -165 0 -165 0 0 170 0 170 -170 0 -170 0 0 330 0 330 168 2 167 3 3 278 2 277 -170 0 -170 0 0 170 0 170 -275 0 -275 0 0 -170 0 -170 -335 0 -335 0 0 170 0 170 -170 0 -170 0 0 165 0 165 -330 0 -330 0 0 -164z" />
+            <path
+                android:fillColor="#000000"
+                android:strokeWidth="1"
+                android:pathData="M2007 3783 c-4 -3 -7 -80 -7 -170 l0 -163 -165 0 -165 0 0 -165 0 -165 -167 -2 -168 -3 0 -555 0 -555 168 -3 167 -2 0 -165 0 -165 165 0 165 0 2 -167 3 -168 555 0 555 0 3 168 2 167 165 0 165 0 0 165 0 165 168 2 167 3 0 555 0 555 -167 3 -168 2 0 165 0 165 -165 0 -165 0 -2 168 -3 167 -551 3 c-303 1 -554 -1 -557 -5z m1113 -498 l0 -165 165 0 165 0 0 -560 0 -560 -165 0 -165 0 0 -165 0 -165 -560 0 -560 0 0 165 0 165 -165 0 -165 0 0 560 0 560 165 0 165 0 0 165 0 165 560 0 560 0 0 -165z" />
+        </group>
+    </vector>
+</aapt:attr>
+<target android:name="shape">
+    <aapt:attr name="android:animation">
+        <set android:ordering="sequentially"
+            android:interpolator="@android:anim/accelerate_interpolator"
+            >
+            <objectAnimator
+                android:duration="300"
+                android:startOffset="000"
+                android:propertyName="rotation"
+                android:valueFrom="0"
+                android:valueTo="360" />
+        </set>
+    </aapt:attr>
+
+</target>
+</animated-vector>

@@ -88,7 +88,6 @@ public class PlayFragment extends Fragment {
 
         return view;
     }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -100,64 +99,48 @@ public class PlayFragment extends Fragment {
         enemyCount = 0;
         updateEnemyCountDisplay();
     }
-
-
-
     @Override
     public void onPause() {
         super.onPause();
         stopEnemySpawnLoop(); // Sustabdo priešų kūrimo uždelsimą
         stopAutomaticShooting(); // Sustabdo automatinį šaudymą
     }
-
-
-
     public void addPoint() {
         _score += clickpower;
         refreshScore();
     }
-
     public void updateScore(int score) {
         _score = score; // Priimame naują reikšmę
         refreshScore(); // Pritaikome ją UI
     }
-
     private void refreshScore() {
         if (_textview != null) {
             _textview.setText("" + _score);
         }
     }
-
     public void subtractPoints(int amount) {
         _score -= amount;
         refreshScore();
     }
-
     public void addPoint(int amount) {
         _score += amount;
         refreshScore();
     }
-
     public int get_score() {
         return _score;
     }
-
     public AppDatabase getDatabase() {
         return _db;
     }
-
     public void increaseClickPower() {
-        clickpower++; // Didiname kiekvieno paspaudimo taškų skaičių
+        clickpower++;
     }
-
     public void resetClickPower() {
-        clickpower = 1; // Resetina paspaudimo taškų kiekį
+        clickpower = 1;
     }
-
     public void setCurrentProfileId(long id) {
         currentProfileId = id;
     }
-
     public void clickXml(float x, float y) {
         ImageView circle = new ImageView(requireContext());
         ViewGroup rootLayout = requireActivity().findViewById(android.R.id.content);
@@ -199,7 +182,6 @@ public class PlayFragment extends Fragment {
         });
         animator.start();
     }
-
     public void clickPopup(float x, float y) {
         TextView popup = new TextView(requireContext());
         popup.setText("+" + clickpower);
@@ -217,7 +199,6 @@ public class PlayFragment extends Fragment {
                 .withEndAction(() -> rootLayout.removeView(popup))
                 .start();
     }
-
     private void spawnEnemy() {
         ImageView enemy = new ImageView(requireContext());
         enemy.setBackgroundResource(R.drawable.mushroom_walk_animation);
@@ -228,14 +209,10 @@ public class PlayFragment extends Fragment {
         int size = (int) (50 * getResources().getDisplayMetrics().density);
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(size, size);
         fragmentRoot.addView(enemy, params);
-
         enemyCount++;
-
         updateEnemyCountDisplay();
-
         // Pažymime, kad priešas yra gyvas
         enemyList.add(enemy);
-
         float startX, startY;
         int side = (int) (Math.random() * 4);
         if (side == 0) {
@@ -251,27 +228,19 @@ public class PlayFragment extends Fragment {
             startX = fragmentRoot.getWidth();
             startY = (float) (Math.random() * fragmentRoot.getHeight());
         }
-
         enemy.setX(startX);
         enemy.setY(startY);
-
         float targetX = _button.getX() + _button.getWidth() / 2;
         float targetY = _button.getY() + _button.getHeight() / 2;
-
         enemy.setTag("enemy");
-
         animateEnemy(enemy, startX, startY, targetX, targetY);
     }
-
-
     private void updateEnemyCountDisplay() {
         TextView enemyCountTextView = requireActivity().findViewById(R.id.enemy_count_text);
         if (enemyCountTextView != null) {
             enemyCountTextView.setText("Enemies: " + enemyCount);
         }
     }
-
-
     private void animateEnemy(ImageView enemy, float startX, float startY, float targetX, float targetY) {
         ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
         animator.setDuration(8000);
@@ -279,10 +248,8 @@ public class PlayFragment extends Fragment {
             float progress = (float) animation.getAnimatedValue();
             float currentX = startX + progress * (targetX - startX);
             float currentY = startY + progress * (targetY - startY);
-
             enemy.setX(currentX);
             enemy.setY(currentY);
-
             // Patikrinti, ar priešas pasiekė bokšto centrą
             float distance = (float) Math.hypot(targetX - currentX, targetY - currentY);
             if (distance < 10) { // Jei atstumas mažesnis nei 10px, pašaliname priešą
@@ -290,10 +257,8 @@ public class PlayFragment extends Fragment {
                 animator.cancel();
             }
         });
-
         animator.start();
     }
-
     // Funkcija, kuri pašalina priešą iš ekrano ir sąrašo
     private void removeEnemy(ImageView enemy) {
         ViewGroup parent = (ViewGroup) enemy.getParent();
@@ -304,11 +269,9 @@ public class PlayFragment extends Fragment {
         }
         enemyList.remove(enemy); // Pašaliname priešą iš sąrašo
     }
-
     private Handler handler = new Handler();
     private long spawnDelay = 2000; // Pradinis atsiradimo greitis (2000ms arba 2 sekundės)
     private int additionalEnemies = 0; // Papildomų priešų skaičius
-
     private Runnable enemySpawnTask = new Runnable() {
         @Override
         public void run() {
@@ -391,6 +354,10 @@ public class PlayFragment extends Fragment {
             projectile.setY(currentY);
         });
 
+        //projectile.setRotationY(2 + t * 100f);
+        //projectile.setRotation(2 + t * 100f);
+        //circle.setRotationY(2 + t * 100f);
+        //circle.setRotation(2 + t * 100f);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

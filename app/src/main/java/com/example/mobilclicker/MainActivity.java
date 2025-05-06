@@ -1,9 +1,28 @@
 package com.example.mobilclicker;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -34,10 +53,16 @@ public class MainActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_play) {
+
+                Log.i("a", "clicked on play i think OUTSIDE");
+                // ANIM HERE
                 if (playFragment == null) {
                     playFragment = new PlayFragment();
                 }
                 selectedFragment = playFragment;
+                View navView = bottomNavigationView.findViewById(R.id.nav_play);
+                        Animation set = AnimationUtils.loadAnimation(this, R.anim.play_extender);
+                navView.startAnimation(set);
             } else if (itemId == R.id.nav_upgrades) {
                 if (upgradesFragment == null) {
                     upgradesFragment = new UpgradesFragment();
@@ -50,7 +75,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 selectedFragment = rebirthFragment;
             } else if (itemId == R.id.nav_settings) {
+
+                Log.i("a", "clicked on settings i think");
                 selectedFragment = new SettingsFragment();
+                View navView = bottomNavigationView.findViewById(R.id.nav_settings);
+                Animation set = AnimationUtils.loadAnimation(this, R.anim.hyperspace_jump);
+                navView.startAnimation(set);
             }
 
             if (selectedFragment != null) {
@@ -105,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
     public void setCurrentProfileId(long id) {
         currentProfileId = id;
     }
-
 
 
     // Reset score and stop point generation
