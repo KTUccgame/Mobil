@@ -20,59 +20,55 @@ import androidx.fragment.app.Fragment;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UpgradesFragment extends Fragment {
+    private PlayFragment playFragment;
     private AtomicBoolean isGeneratorActive = new AtomicBoolean(false);
     private Handler handler = new Handler();
-    private MainActivity mainActivity;
-    int generatorPrice = 10;
+    private int generatorPrice = 10;
     private int generatorsOwned = 0;
-    private TextView generatorPriceText;
+
+
+    private int clickUpgradePrice = 5; // Atskira kaina Click Upgrade
+    private int clickUpgradeLevel = 0;
+
+
     private Button pointGeneratorButton;
     private Button upgradeButton;
-    public UpgradesFragment() {
-        // Reikalingas tuščias konstruktorius
-    }
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Gauti PlayFragment iš FragmentManager
+        playFragment = (PlayFragment) requireActivity()
+                .getSupportFragmentManager().findFragmentByTag("PLAY_FRAGMENT");
+
+        if (playFragment == null) {
+            Log.e("UpgradesFragment", "PlayFragment is null!");
+        }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_upgrades, container, false);
-        mainActivity = (MainActivity) getActivity();
+
         pointGeneratorButton = view.findViewById(R.id.point_generator_button);
-        upgradeButton=view.findViewById(R.id.point_upgrade_button);
+        upgradeButton = view.findViewById(R.id.point_upgrade_button);
 
-        ScrollView scrollView = view.findViewById(R.id.scrollViewer);
-        /*
-        // force trigger an animation ↓
-        scrollView.post(() -> {
-            ObjectAnimator animator = ObjectAnimator.ofInt(scrollView, "scrollY", scrollView.getScrollY() + 500);
-            animator.setDuration(5000); // 1 second scroll
-            animator.setInterpolator(new LinearInterpolator());
-            // LinearInterpolator() DecelerateInterpolator() or google the other ones :]
-            animator.start();
-        });
-        */
-        scrollView.setOnScrollChangeListener((View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) -> {
-            //view.setAlpha(1.0f - (scrollY / 1000f));
-            // on scroll, fade out the background, shows play area... not useful
-        });
-
-        // Pakrauname išsaugotus duomenis
+        // Pakrauname generatorių duomenis
         loadGeneratorData();
-        pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
-        pointGeneratorButton.setOnClickListener(v -> {
-            if (mainActivity.get_score() >= generatorPrice) {
-                mainActivity.subtractPoints(generatorPrice);
-                //generatorsOwned++;
-                //generatorPrice += 10;
-                // up dao
-                mainActivity._db.upgradeDAO().incrementUpgrade(1);
-                Log.w("db","" + mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount());
-                //Log.w("db", " " + mainActivity._db.upgradeDAO().getUpgradeByName("Click Multiplier").getId());
-                // up dao
-                generatorsOwned = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount();
 
-                generatorPrice = mainActivity._db.upgradeDAO().getUpgradeById(1).getAmount() * 10 + 10;
+
+        pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
+        upgradeButton.setText("Click Upgrade (" + clickUpgradePrice + " points)");
+
+        pointGeneratorButton.setOnClickListener(v -> {
+            if (playFragment != null && playFragment.get_score() >= generatorPrice) {
+                playFragment.subtractPoints(generatorPrice);
+                generatorsOwned++;
+                generatorPrice = generatorsOwned * 10 + 10;
                 pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
-                // Išsaugome duomenis
+
+                // Išsaugome naujas vertes
                 saveGeneratorData();
 
                 if (isGeneratorActive.compareAndSet(false, true)) {
@@ -80,67 +76,95 @@ public class UpgradesFragment extends Fragment {
                 }
             }
         });
-        upgradeButton.setText("Click Upgrade ("+ generatorPrice+ " points)");
+
+
         upgradeButton.setOnClickListener(v -> {
-            if (mainActivity.get_score()>=generatorPrice){
-                mainActivity.subtractPoints(generatorPrice);
-                //mainActivity._db.upgradeDAO().incrementUpgrade(2);
-                //Log.w("db", "" + mainActivity._db.upgradeDAO().getUpgradeById(2).getAmount()*10);
-                //generatorsOwned = mainActivity._db.upgradeDAO().getUpgradeById(2).getAmount();
-                //generatorPrice = mainActivity._db.upgradeDAO().getUpgradeById(2).getAmount() * 10;
-                upgradeButton.setText("Click upgrade (" + generatorPrice + " points)");
-                mainActivity.clickpower++;
+            if (playFragment != null && playFragment.get_score() >= clickUpgradePrice) {
+                playFragment.subtractPoints(clickUpgradePrice);
+
+                // Padidinti kiekvieno paspaudimo duodamų taškų kiekį
+                playFragment.increaseClickPower();
+
+                clickUpgradeLevel++;
+                clickUpgradePrice = clickUpgradeLevel * 5 + 5;
+
+                upgradeButton.setText("Click Upgrade (" + clickUpgradePrice + " points)");
+
+                // Išsaugoti naujas vertes
+                saveGeneratorData();
             }
         });
 
+
         return view;
     }
+
     private void startPointGeneration() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mainActivity != null) {
-                    mainActivity.addPoint(generatorsOwned);
-                }
-                if (isGeneratorActive.get()) {
-                    handler.postDelayed(this, 1000);
-                }
+        handler.postDelayed(() -> {
+            if (playFragment != null) {
+                playFragment.addPoint(generatorsOwned);
+            }
+            if (isGeneratorActive.get()) {
+                handler.postDelayed(this::startPointGeneration, 1000);
             }
         }, 1000);
     }
+
     public void stopPointGeneration() {
         isGeneratorActive.set(false);
         handler.removeCallbacksAndMessages(null);
 
-        Upgrade upgrade = mainActivity._db.upgradeDAO().getUpgradeById(1);
-        upgrade.setBaseCost(10); // Reset cost
-        upgrade.setAmount(0);    // Reset amount
-        mainActivity._db.upgradeDAO().updateUpgrade(upgrade); // Save changes
+        if (playFragment != null) {
+            Upgrade upgrade = playFragment.getDatabase().upgradeDAO().getUpgradeById(1);
+            upgrade.setBaseCost(10);
+            upgrade.setAmount(0);
+            playFragment.getDatabase().upgradeDAO().updateUpgrade(upgrade);
+        }
     }
 
     private void saveGeneratorData() {
-        if (mainActivity == null) return;
-        mainActivity.getSharedPreferences("upgrade_prefs", mainActivity.MODE_PRIVATE)
+        if (playFragment == null) return;
+
+        playFragment.requireActivity().getSharedPreferences("upgrade_prefs", playFragment.requireActivity().MODE_PRIVATE)
                 .edit()
                 .putInt("generatorsOwned", generatorsOwned)
                 .putInt("generatorPrice", generatorPrice)
                 .putBoolean("isGeneratorActive", isGeneratorActive.get()) // Įrašome generatoriaus aktyvumo būseną
                 .apply();
     }
+
     private void loadGeneratorData() {
-        if (mainActivity == null) return;
-        generatorsOwned = mainActivity.getSharedPreferences("upgrade_prefs", mainActivity.MODE_PRIVATE)
+        if (playFragment == null) return;
+
+        generatorsOwned = playFragment.requireActivity().getSharedPreferences("upgrade_prefs", playFragment.requireActivity().MODE_PRIVATE)
                 .getInt("generatorsOwned", 0);
-        generatorPrice = mainActivity.getSharedPreferences("upgrade_prefs", mainActivity.MODE_PRIVATE)
+        generatorPrice = playFragment.requireActivity().getSharedPreferences("upgrade_prefs", playFragment.requireActivity().MODE_PRIVATE)
                 .getInt("generatorPrice", 10);
 
         // Atkuriame generatoriaus aktyvumo būseną iš SharedPreferences
-        boolean generatorWasActive = mainActivity.getSharedPreferences("upgrade_prefs", mainActivity.MODE_PRIVATE)
+        boolean generatorWasActive = playFragment.requireActivity().getSharedPreferences("upgrade_prefs", playFragment.requireActivity().MODE_PRIVATE)
                 .getBoolean("isGeneratorActive", false); // Numatytoji reikšmė - false
-        // Jei generatorius buvo aktyvus, pradėti jo generavimą
+
         if (generatorWasActive && !isGeneratorActive.get()) {
             isGeneratorActive.set(true);
             startPointGeneration();  // Atkuriame generavimo funkcionalumą, jei generatorius buvo aktyvus
         }
     }
+
+
+    public void resetUpgrades() {
+        generatorsOwned = 0;
+        generatorPrice = 10;
+        clickUpgradeLevel = 0;
+        clickUpgradePrice = 5;
+
+        // Atnaujinti mygtukų tekstą
+        pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
+        upgradeButton.setText("Click Upgrade (" + clickUpgradePrice + " points)");
+
+        // Išsaugoti resetintus duomenis
+        saveGeneratorData();
+    }
+
+
 }

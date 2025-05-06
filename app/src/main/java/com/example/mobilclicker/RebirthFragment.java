@@ -21,17 +21,16 @@ public class RebirthFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the fragment view
         View view = inflater.inflate(R.layout.fragment_rebirth, container, false);
-        mainActivity = (MainActivity) getActivity();
 
-        // Add reset button functionality
+        if (getActivity() instanceof MainActivity) {
+            mainActivity = (MainActivity) getActivity();
+        } else {
+            mainActivity = null;
+        }
+
         Button resetButton = view.findViewById(R.id.reset_button);
-
-        resetButton.setOnClickListener(v -> {
-            // Reset the game data
-            resetGameData();
-        });
+        resetButton.setOnClickListener(v -> resetGameData());
 
         return view;
     }
@@ -40,20 +39,23 @@ public class RebirthFragment extends Fragment {
         this.upgradesFragment = upgradesFragment;
     }
     private void resetGameData() {
-        if (mainActivity != null) {
-            // Clear SharedPreferences
-            mainActivity.getSharedPreferences("upgrade_prefs", mainActivity.MODE_PRIVATE)
-                    .edit()
-                    .clear()
-                    .apply();
+        if (mainActivity == null) {
+            Toast.makeText(getContext(), "Klaida: Pagrindinė veikla nepasiekiama!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            // Reset the score
-            mainActivity.resetScore();
+        // Clear SharedPreferences
+        mainActivity.getSharedPreferences("upgrade_prefs", mainActivity.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply();
 
-            // Stop point generation through upgradesFragment
-            if (upgradesFragment != null) {
-                upgradesFragment.stopPointGeneration();
-            }
+        // Reset the score
+        mainActivity.resetScore();
+
+        // Stop point generation through upgradesFragment
+        if (upgradesFragment != null) {
+            upgradesFragment.stopPointGeneration();
         }
     }
 }
