@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:aapt="http://schemas.android.com/aapt">
+<aapt:attr name="android:drawable">
+    <vector
+        android:width="100dp"
+        android:height="100dp"
+        android:viewportWidth="100"
+        android:viewportHeight="100">
+        <path
+            android:name="shape"
+            android:fillColor="#FF4081"
+            android:pathData="  M20,    80
+                                L20,    20
+                                L80,    50 Z" />
+    </vector>
+</aapt:attr>
+<target android:name="shape">
+    <aapt:attr name="android:animation">
+        <set android:ordering="sequentially"
+            android:interpolator="@android:anim/accelerate_interpolator"
+            >
+            <objectAnimator
+                android:duration="300"
+                android:startOffset="3000"
+                android:propertyName="rotation"
+                android:valueFrom="30"
+                android:valueTo="-30"
+                android:repeatCount="infinite"
+                android:repeatMode="reverse" />
+        </set>
+    </aapt:attr>
+
+</target>
+</animated-vector>
