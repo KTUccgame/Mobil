@@ -150,7 +150,7 @@ public class SettingsFragment extends Fragment {
         new Thread(() -> {
             ProfileSettingsDAO dao = AppActivity.db2.profileDAO();
             ProfileSettings profile = dao.loadAllByIds(new int[]{(int) profileId}).get(0);
-            mainActivity.runOnUiThread(() -> {
+            requireActivity().runOnUiThread(() -> {
                 currentProfileId = profile.getId();
                 soundBox.setChecked(profile.isSoundBox());
                 volumeBox.setChecked(profile.isVolumeBox());
@@ -159,6 +159,13 @@ public class SettingsFragment extends Fragment {
                 mainActivity.isUser = !profile.isAdminCheck();
                 profileText.setText(profile.getName());
                 mainActivity.setCurrentProfileId(profile.getId());
+
+                // Atnaujinti PlayFragment su nauju profilio ID
+                PlayFragment playFragment = (PlayFragment) requireActivity()
+                        .getSupportFragmentManager().findFragmentByTag("PLAY_FRAGMENT");
+                if (playFragment != null) {
+                    playFragment.setCurrentProfileId(profile.getId());
+                }
             });
         }).start();
     }
@@ -186,5 +193,6 @@ public class SettingsFragment extends Fragment {
 
         }).start();
     }
+
 }
 
