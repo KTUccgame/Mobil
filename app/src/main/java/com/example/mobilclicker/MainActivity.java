@@ -1,7 +1,12 @@
 package com.example.mobilclicker;
 
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -41,14 +46,33 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_upgrades) {
                 if (upgradesFragment == null) {
                     upgradesFragment = new UpgradesFragment();
+
                 }
                 selectedFragment = upgradesFragment;
+
+                // ANIMACIJA ant nav_upgrades mygtuko
+                View navView = bottomNavigationView.findViewById(R.id.nav_upgrades);
+                if (navView != null) {
+                    Animation animation = AnimationUtils.loadAnimation(this, R.anim.move_up_and_down);
+                    navView.startAnimation(animation);
+                }
+
+
             } else if (itemId == R.id.nav_rebirth) {
                 if (rebirthFragment == null) {
                     rebirthFragment = new RebirthFragment();
                     rebirthFragment.setUpgradesFragment(upgradesFragment);
                 }
                 selectedFragment = rebirthFragment;
+                // ANIMACIJA ant nav_rebirth mygtuko
+                View navView = bottomNavigationView.findViewById(R.id.nav_rebirth);
+                if (navView != null) {
+                    ObjectAnimator animator = ObjectAnimator.ofFloat(navView, "rotationY", 0f, 360f);
+                    animator.setDuration(600);
+                    animator.setInterpolator(new AccelerateDecelerateInterpolator());
+                    animator.start();
+                }
+
             } else if (itemId == R.id.nav_settings) {
                 selectedFragment = new SettingsFragment();
             }
