@@ -1,0 +1,2 @@
+text file for reading text from a text file,
+file is located in the "raw" directory

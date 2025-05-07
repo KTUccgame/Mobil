@@ -7,6 +7,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
@@ -40,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
 
         // Initialize BottomNavigationView
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -81,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 View navView = bottomNavigationView.findViewById(R.id.nav_settings);
                 Animation set = AnimationUtils.loadAnimation(this, R.anim.hyperspace_jump);
                 navView.startAnimation(set);
+
             }
 
             if (selectedFragment != null) {
@@ -105,6 +110,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void setColorBg(int BGcolor)
+    {
+        getWindow().getDecorView().setBackgroundColor(BGcolor);
+    }
     /*
     public void clickPopup()
     {

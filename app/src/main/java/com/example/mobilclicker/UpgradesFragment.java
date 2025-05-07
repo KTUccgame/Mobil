@@ -15,24 +15,25 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UpgradesFragment extends Fragment {
+    private MainActivity mainActivity;
     private PlayFragment playFragment;
     private AtomicBoolean isGeneratorActive = new AtomicBoolean(false);
     private Handler handler = new Handler();
     private int generatorPrice = 10;
     private int generatorsOwned = 0;
 
-
     private int clickUpgradePrice = 5; // Atskira kaina Click Upgrade
     private int clickUpgradeLevel = 0;
 
-
     private Button pointGeneratorButton;
     private Button upgradeButton;
+    private Button upgrade_editing_button;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,9 @@ public class UpgradesFragment extends Fragment {
         if (playFragment == null) {
             Log.e("UpgradesFragment", "PlayFragment is null!");
         }
+
+
+
     }
 
     @Override
@@ -53,6 +57,38 @@ public class UpgradesFragment extends Fragment {
 
         pointGeneratorButton = view.findViewById(R.id.point_generator_button);
         upgradeButton = view.findViewById(R.id.point_upgrade_button);
+        upgrade_editing_button = view.findViewById(R.id.upgrade_editing_button);
+
+        mainActivity = (MainActivity) getActivity();
+        /*
+        if(mainActivity.isUser)
+        {
+            upgrade_editing_button.setVisibility(View.INVISIBLE);
+            // hide edit button
+
+        } else if (!mainActivity.isUser)
+        {
+            upgrade_editing_button.setVisibility(View.VISIBLE);
+            // show edit button
+        }*/
+        if (mainActivity == null)
+        {
+
+        }
+        else {
+            if (mainActivity.isUser) {
+                Log.i("WAWA", "Toast! User role is a user");
+                Toast.makeText(mainActivity, "User role is a user", Toast.LENGTH_SHORT).show();
+                view.setBackgroundColor(Color.BLUE);
+                //mainActivity.setColorBg(0xFF00FF00);
+                //0xFF00FF00
+            } else if (!mainActivity.isUser) {
+                Log.i("WAWA", "Toast! User role is an admin, so they see the edit button");
+                Toast.makeText(mainActivity, "User role is an admin", Toast.LENGTH_SHORT).show();
+                view.setBackgroundColor(Color.RED);
+                //mainActivity.setColorBg(0xFFFFFF00);
+            }
+        }
 
         // Pakrauname generatorių duomenis
         loadGeneratorData();
@@ -76,8 +112,6 @@ public class UpgradesFragment extends Fragment {
                 }
             }
         });
-
-
         upgradeButton.setOnClickListener(v -> {
             if (playFragment != null && playFragment.get_score() >= clickUpgradePrice) {
                 playFragment.subtractPoints(clickUpgradePrice);
@@ -94,8 +128,9 @@ public class UpgradesFragment extends Fragment {
                 saveGeneratorData();
             }
         });
-
-
+        upgrade_editing_button.setOnClickListener(v -> {
+            // edit button clicked, swap out buttons for editable entries
+        });
         return view;
     }
 
@@ -109,7 +144,6 @@ public class UpgradesFragment extends Fragment {
             }
         }, 1000);
     }
-
     public void stopPointGeneration() {
         isGeneratorActive.set(false);
         handler.removeCallbacksAndMessages(null);
@@ -121,7 +155,6 @@ public class UpgradesFragment extends Fragment {
             playFragment.getDatabase().upgradeDAO().updateUpgrade(upgrade);
         }
     }
-
     private void saveGeneratorData() {
         if (playFragment == null) return;
 
@@ -132,7 +165,6 @@ public class UpgradesFragment extends Fragment {
                 .putBoolean("isGeneratorActive", isGeneratorActive.get()) // Įrašome generatoriaus aktyvumo būseną
                 .apply();
     }
-
     private void loadGeneratorData() {
         if (playFragment == null) return;
 
@@ -150,8 +182,6 @@ public class UpgradesFragment extends Fragment {
             startPointGeneration();  // Atkuriame generavimo funkcionalumą, jei generatorius buvo aktyvus
         }
     }
-
-
     public void resetUpgrades() {
         generatorsOwned = 0;
         generatorPrice = 10;
@@ -165,6 +195,4 @@ public class UpgradesFragment extends Fragment {
         // Išsaugoti resetintus duomenis
         saveGeneratorData();
     }
-
-
 }

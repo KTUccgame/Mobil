@@ -23,7 +23,7 @@
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/editButton"
+        android:id="@+id/upgrade_editing_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Edit"
@@ -37,7 +37,7 @@
         android:layout_width="363dp"
         android:layout_height="289dp"
         android:layout_marginTop="36dp"
-        app:layout_constraintBottom_toTopOf="@+id/editButton"
+        app:layout_constraintBottom_toTopOf="@+id/upgrade_editing_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

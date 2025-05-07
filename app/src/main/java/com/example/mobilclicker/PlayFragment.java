@@ -9,6 +9,7 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -34,6 +37,7 @@ public class PlayFragment extends Fragment {
     private ProfileSettingsDAO _profileDAO;
     boolean isUser = true;
     public long currentProfileId = 1;
+    private long pressStartTime = 0;
     private List<ImageView> enemyList = new ArrayList<>();
     private long timeElapsed = 0; // Laikas, praleistas žaidime (milisekundėmis)
     private long timeForNextIncrease = 30000; // Laikas po kurio priešų atsiradimo dažnis padidės (pavyzdžiui, kas 30 sekundžių)
@@ -59,6 +63,7 @@ public class PlayFragment extends Fragment {
         _profileDAO = _db2.profileDAO();
 
         // Bokšto animacija
+
         _button.setBackgroundResource(R.drawable.tower_animation);
         AnimationDrawable towerAnimation = (AnimationDrawable) _button.getBackground();
         _button.setImageDrawable(null);
@@ -66,13 +71,13 @@ public class PlayFragment extends Fragment {
 
         _button.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                long startTime = System.currentTimeMillis();
+                pressStartTime = startTime;
                 addPoint();
                 _textview.setText("" + _score);
                 float touchX = event.getRawX();
                 float touchY = event.getRawY();
-
                 shootAtEnemy();
-
                 new Thread(() -> {
                     ProfileSettings profile = _profileDAO.loadAllByIds(new int[]{(int) currentProfileId}).get(0);
                     if (profile.isNumberBox()) {
@@ -83,8 +88,25 @@ public class PlayFragment extends Fragment {
                     }
                 }).start();
             }
+            if (event.getAction() == MotionEvent.ACTION_UP)
+            {
+                long endTime = System.currentTimeMillis();
+                Log.i("hold", " holding " + endTime +" "+pressStartTime);
+                if (pressStartTime > -0.1) {
+                    float holdDuration = endTime - pressStartTime;
+
+                    Toast.makeText(
+                            v.getContext(),
+                            "Button held for " + String.format("%.3f", holdDuration/1000f) +
+                                    " seconds",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+           }
             return false;
         });
+
+
 
         return view;
     }
