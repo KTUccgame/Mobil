@@ -13,15 +13,16 @@
     <!-- Upgrades -->
     <item
         android:id="@+id/nav_upgrades"
-        android:icon="@drawable/upgrade"
+        android:icon="@drawable/rectangle_with_arrow"
         tools:ignore="MenuTitle" />
 
     <!-- Rebirth -->
     <item
         android:id="@+id/nav_rebirth"
-        android:icon="@drawable/rebirth"
-        tools:ignore="MenuTitle"
-        />
+
+        android:icon="@drawable/circle_with_arrow"
+        tools:ignore="MenuTitle" />
+
 
     <!-- Settings -->
     <item
