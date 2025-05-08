@@ -28,5 +28,4 @@
         tools:ignore="MenuTitle"
         android:checkable="false"/>
 
-
 </menu>
