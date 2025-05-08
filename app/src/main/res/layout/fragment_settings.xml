@@ -168,7 +168,6 @@
             android:padding="160dp"
             android:background="@android:drawable/edit_text"
             android:scrollbars="vertical"
-            android:gravity="start|top"
             android:textColor="@android:color/black"/>
     </androidx.core.widget.NestedScrollView>
 
