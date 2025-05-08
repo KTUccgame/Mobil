@@ -1,170 +1,219 @@
 package com.example.mobilclicker;
 
-import android.animation.ObjectAnimator;
-import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import androidx.fragment.app.Fragment;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UpgradesFragment extends Fragment {
     private PlayFragment playFragment;
     private AtomicBoolean isGeneratorActive = new AtomicBoolean(false);
     private Handler handler = new Handler();
-    private int generatorPrice = 10;
+
+    private Map<String, Integer> upgradeLevels = new HashMap<>();
+    private Map<String, Integer> upgradePrices = new HashMap<>();
+    private LinearLayout upgradesLayout;
     private int generatorsOwned = 0;
-
-
-    private int clickUpgradePrice = 5; // Atskira kaina Click Upgrade
-    private int clickUpgradeLevel = 0;
-
-
-    private Button pointGeneratorButton;
-    private Button upgradeButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Gauti PlayFragment iš FragmentManager
         playFragment = (PlayFragment) requireActivity()
                 .getSupportFragmentManager().findFragmentByTag("PLAY_FRAGMENT");
 
         if (playFragment == null) {
             Log.e("UpgradesFragment", "PlayFragment is null!");
         }
+
+
+
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_upgrades, container, false);
 
-        pointGeneratorButton = view.findViewById(R.id.point_generator_button);
-        upgradeButton = view.findViewById(R.id.point_upgrade_button);
+        upgradesLayout = view.findViewById(R.id.upgrades_layout);
 
-        // Pakrauname generatorių duomenis
-        loadGeneratorData();
+        fetchUpgradesFromDatabase();
 
+        Button databaseInfoButton = view.findViewById(R.id.database_info_button);
+        Button editButton = view.findViewById(R.id.edit_Button);
 
-        pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
-        upgradeButton.setText("Click Upgrade (" + clickUpgradePrice + " points)");
+        // Hide buttons initially
+        databaseInfoButton.setVisibility(View.GONE);
+        editButton.setVisibility(View.GONE);
 
-        pointGeneratorButton.setOnClickListener(v -> {
-            if (playFragment != null && playFragment.get_score() >= generatorPrice) {
-                playFragment.subtractPoints(generatorPrice);
-                generatorsOwned++;
-                generatorPrice = generatorsOwned * 10 + 10;
-                pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
+        // CHECK ADMIN STATUS USING currentProfileId
+        new Thread(() -> {
+            boolean isAdmin = isAdmin();
+            AppDatabase2 db = AppDatabase2.getInstance(getContext());
+            ProfileSettingsDAO profileSettingsDAO = db.profileDAO();
 
-                // Išsaugome naujas vertes
-                saveGeneratorData();
+            MainActivity mainActivity = (MainActivity) getActivity();
+            long currentProfileId = mainActivity.currentProfileId; // Get Profile ID
 
-                if (isGeneratorActive.compareAndSet(false, true)) {
-                    startPointGeneration();
-                }
-            }
-        });
+            // Update UI on the main thread
+            getActivity().runOnUiThread(() -> {
+                databaseInfoButton.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+                editButton.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            });
 
+            databaseInfoButton.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), DatabaseInfoActivity.class);
+                startActivity(intent);
+            });
 
-        upgradeButton.setOnClickListener(v -> {
-            if (playFragment != null && playFragment.get_score() >= clickUpgradePrice) {
-                playFragment.subtractPoints(clickUpgradePrice);
+            editButton.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), EditActivity.class);
+                startActivity(intent);
+            });
 
-                // Padidinti kiekvieno paspaudimo duodamų taškų kiekį
-                playFragment.increaseClickPower();
-
-                clickUpgradeLevel++;
-                clickUpgradePrice = clickUpgradeLevel * 5 + 5;
-
-                upgradeButton.setText("Click Upgrade (" + clickUpgradePrice + " points)");
-
-                // Išsaugoti naujas vertes
-                saveGeneratorData();
-            }
-        });
-
+        }).start();
 
         return view;
     }
 
-    private void startPointGeneration() {
-        handler.postDelayed(() -> {
-            if (playFragment != null) {
-                playFragment.addPoint(generatorsOwned);
-            }
-            if (isGeneratorActive.get()) {
-                handler.postDelayed(this::startPointGeneration, 1000);
-            }
-        }, 1000);
+    // Inside UpgradesFragment
+    public void fetchUpgradesFromDatabase() {
+        AppDatabase db = AppDatabase.getInstance(getContext());
+
+        new Thread(() -> {
+            List<Upgrade> upgrades = db.upgradeDAO().getAllUpgrades(); // Fetch all upgrades
+
+            getActivity().runOnUiThread(() -> {
+                //Clear existing upgrade buttons
+                upgradesLayout.removeAllViews();
+
+                for (Upgrade upgrade : upgrades) {
+                    Button upgradeButton = new Button(getContext());
+                    String id = upgrade.getId();
+                    int level = upgrade.getAmount();
+                    int price = (int) upgrade.getBaseCost();
+                    int maxAmount = (int) upgrade.getMaxAmount();
+
+                    upgradeLevels.put(id, level);
+                    upgradePrices.put(id, price);
+
+                    if (level >= maxAmount) {
+                        upgradeButton.setText(upgrade.getName() + " Maxed Out");
+                    } else {
+                        upgradeButton.setText(upgrade.getName() + " (Level: " + level + ", Cost: " + price + " points)");
+
+                        upgradeButton.setOnClickListener(v -> {
+                            int upgradePrice = upgradePrices.get(id);
+                            if (playFragment.get_score() >= upgradePrice) {
+                                playFragment.subtractPoints(upgradePrice);
+
+                                new Thread(() -> {
+                                    Upgrade upgradeEntity = db.upgradeDAO().getUpgradeById(id);
+                                    if (upgradeEntity != null) {
+                                        upgradeEntity.setAmount(upgradeEntity.getAmount() + 1);
+                                        upgradeEntity.setCost(upgradeEntity.getBaseCost() + 10);
+                                        db.upgradeDAO().update(upgradeEntity);
+
+                                        // Execute the upgrade action here
+                                        getActivity().runOnUiThread(() -> {
+                                            // Execute the upgrade action after purchase
+                                            UpgradeManager.executeUpgradeAction(id, playFragment);
+                                            fetchUpgradesFromDatabase(); // 🔹 Refresh UI correctly
+                                        });
+                                    }
+                                }).start();
+                            }
+                        });
+                    }
+
+                    upgradesLayout.addView(upgradeButton);
+                }
+            });
+        }).start();
     }
 
-    public void stopPointGeneration() {
-        isGeneratorActive.set(false);
-        handler.removeCallbacksAndMessages(null);
 
-        if (playFragment != null) {
-            Upgrade upgrade = playFragment.getDatabase().upgradeDAO().getUpgradeById(1);
-            upgrade.setBaseCost(10);
-            upgrade.setAmount(0);
-            playFragment.getDatabase().upgradeDAO().updateUpgrade(upgrade);
-        }
+
+    private void updateUpgradeInDatabase(Upgrade upgrade) {
+        // Get the instance of the database
+        AppDatabase db = AppDatabase.getInstance(getContext());
+
+        // Update the upgrade in the database on a background thread
+        new Thread(() -> {
+            // Modify the upgrade's level and cost
+            upgrade.setAmount(upgradeLevels.get(upgrade.getId()));
+            upgrade.setCost(upgradePrices.get(upgrade.getId()));
+
+            // Update the upgrade in the database
+            db.upgradeDAO().update(upgrade);
+
+            Log.d("UpgradesFragment", "Upgrade updated in the database: " + upgrade.getName());
+        }).start();
     }
 
-    private void saveGeneratorData() {
-        if (playFragment == null) return;
-
-        playFragment.requireActivity().getSharedPreferences("upgrade_prefs", playFragment.requireActivity().MODE_PRIVATE)
-                .edit()
-                .putInt("generatorsOwned", generatorsOwned)
-                .putInt("generatorPrice", generatorPrice)
-                .putBoolean("isGeneratorActive", isGeneratorActive.get()) // Įrašome generatoriaus aktyvumo būseną
-                .apply();
-    }
-
-    private void loadGeneratorData() {
-        if (playFragment == null) return;
-
-        generatorsOwned = playFragment.requireActivity().getSharedPreferences("upgrade_prefs", playFragment.requireActivity().MODE_PRIVATE)
-                .getInt("generatorsOwned", 0);
-        generatorPrice = playFragment.requireActivity().getSharedPreferences("upgrade_prefs", playFragment.requireActivity().MODE_PRIVATE)
-                .getInt("generatorPrice", 10);
-
-        // Atkuriame generatoriaus aktyvumo būseną iš SharedPreferences
-        boolean generatorWasActive = playFragment.requireActivity().getSharedPreferences("upgrade_prefs", playFragment.requireActivity().MODE_PRIVATE)
-                .getBoolean("isGeneratorActive", false); // Numatytoji reikšmė - false
-
-        if (generatorWasActive && !isGeneratorActive.get()) {
-            isGeneratorActive.set(true);
-            startPointGeneration();  // Atkuriame generavimo funkcionalumą, jei generatorius buvo aktyvus
-        }
-    }
 
 
     public void resetUpgrades() {
         generatorsOwned = 0;
-        generatorPrice = 10;
-        clickUpgradeLevel = 0;
-        clickUpgradePrice = 5;
+        upgradeLevels.clear();
+        upgradePrices.clear();
+        isGeneratorActive.set(false);
+        handler.removeCallbacksAndMessages(null);
 
-        // Atnaujinti mygtukų tekstą
-        pointGeneratorButton.setText("Point Generator (" + generatorPrice + " points)");
-        upgradeButton.setText("Click Upgrade (" + clickUpgradePrice + " points)");
+        upgradesLayout.removeAllViews(); // Reset the buttons visually
 
-        // Išsaugoti resetintus duomenis
-        saveGeneratorData();
+        onCreateView(getLayoutInflater(), (ViewGroup) getView().getParent(), null); // Reload layout
+
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Refresh upgrade list
+        fetchUpgradesFromDatabase();
+
+        // Execute actions for upgrades that are active
+        new Thread(() -> {
+            AppDatabase db = AppDatabase.getInstance(getContext());
+            List<Upgrade> upgrades = db.upgradeDAO().getAllUpgrades();
+
+            getActivity().runOnUiThread(() -> {
+                for (Upgrade upgrade : upgrades) {
+                    String id = upgrade.getId();
+                    int level = upgrade.getAmount();
+
+                    // 🔥 Check if the upgrade should be executed based on its level
+                    if (level > 0) {
+                        UpgradeManager.executeUpgradeAction(id, playFragment);
+                    }
+                }
+            });
+        }).start();
+    }
+
+
+    private boolean isAdmin() {
+        AppDatabase2 db = AppDatabase2.getInstance(getContext());
+        ProfileSettingsDAO profileSettingsDAO = db.profileDAO();
+
+        MainActivity mainActivity = (MainActivity) getActivity();
+        long currentProfileId = mainActivity.currentProfileId;
+
+        ProfileSettings profile = profileSettingsDAO.findById(currentProfileId);
+        return profile != null && profile.isAdminCheck();
+    }
 
 }

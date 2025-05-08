@@ -23,21 +23,31 @@
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/editButton"
+        android:id="@+id/edit_Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="55dp"
         android:text="Edit"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/database_info_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Database Info"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/edit_Button" />
 
     <com.example.mobilclicker.EditedScrollView
         android:id="@+id/scrollViewer"
         android:layout_width="363dp"
         android:layout_height="289dp"
         android:layout_marginTop="36dp"
-        app:layout_constraintBottom_toTopOf="@+id/editButton"
+        app:layout_constraintBottom_toTopOf="@+id/edit_Button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,66 +55,12 @@
         app:layout_constraintVertical_bias="0.5">
 
         <LinearLayout
+            android:id="@+id/upgrades_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintBottom_toTopOf="@+id/text_upgrades"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5">
+            android:padding="16dp" />
 
-            <Button
-                android:id="@+id/point_generator_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Point Generator 10 "
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/point_upgrade_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/point_upgrade_button15"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/point_upgrade_button16"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/point_upgrade_button17"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/point_upgrade_button18"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/point_upgrade_button19"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-            <Button
-                android:id="@+id/point_upgrade_button20"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-
-        </LinearLayout>
     </com.example.mobilclicker.EditedScrollView>
 
 

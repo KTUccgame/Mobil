@@ -3,8 +3,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -13,9 +11,12 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -41,7 +42,6 @@ public class PlayFragment extends Fragment {
 
     private int enemyCount = 0;
 
-
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
@@ -66,39 +66,97 @@ public class PlayFragment extends Fragment {
 
         _button.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                addPoint();
-                _textview.setText("" + _score);
-                float touchX = event.getRawX();
-                float touchY = event.getRawY();
-
-                shootAtEnemy();
-
+                // Use a background thread to query the database
                 new Thread(() -> {
-                    ProfileSettings profile = _profileDAO.loadAllByIds(new int[]{(int) currentProfileId}).get(0);
-                    if (profile.isNumberBox()) {
-                        requireActivity().runOnUiThread(() -> {
-                            clickPopup(touchX, touchY);
-                            clickXml(touchX, touchY);
-                        });
-                    }
+                    AppDatabase db = AppDatabase.getInstance(getContext());
+                    List<Upgrade> upgrades = db.upgradeDAO().getAllUpgrades(); // Get all upgrades
+
+                    boolean isClickerPurchased = upgrades.stream().anyMatch(upgrade -> "clicking".equals(upgrade.getId()) && upgrade.getAmount() > 0);
+
+                    // If amount > 0, the upgrade is considered purchased
+                    // Exit the loop once we find that the clicker upgrade is purchased
+
+                    getActivity().runOnUiThread(() -> {
+                        if (isClickerPurchased) {
+                            // Perform the click action only if the clicker upgrade is purchased
+                            addPoint(); // Add points to the score
+                            _textview.setText("" + _score); // Update the score display
+
+                            // Get the touch position
+                            float touchX = event.getRawX();
+                            float touchY = event.getRawY();
+
+                            // Perform shooting at enemy (or any other logic you need)
+
+
+                            // Check profile settings and show popups if necessary
+                            new Thread(() -> {
+                                ProfileSettings profile = _profileDAO.loadAllByIds(new int[]{(int) currentProfileId}).get(0);
+                                if (profile.isNumberBox()) {
+                                    requireActivity().runOnUiThread(() -> {
+                                        clickPopup(touchX, touchY);
+                                        clickXml(touchX, touchY);
+                                    });
+                                }
+                            }).start();
+                        } else {
+                            // Optionally show a message or disable the button if the upgrade isn't purchased
+                            Toast.makeText(getContext(), "Clicker upgrade not purchased yet!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }).start();
             }
-            return false;
+            return true;  // Return true to indicate that the event has been handled
         });
+
+
 
         return view;
     }
+
     @Override
     public void onResume() {
         super.onResume();
         refreshScore(); // Grįžus į fragmentą, atnaujiname taškų skaičių
-        startEnemySpawnLoop(); // Pradeda priešų atsiradimą
-        startAutomaticShooting(); // Pradeda automatinį šaudymą
+
+        if(enemyCount<0)
+            enemyCount=0;
+        // Start the enemy spawn loop if the enemy spawner upgrade is purchased
+        new Thread(() -> {
+            AppDatabase db = AppDatabase.getInstance(getContext());
+            List<Upgrade> upgrades = db.upgradeDAO().getAllUpgrades(); // Get all upgrades
+
+            boolean isEnemySpawnerPurchased = false;
+            boolean isShootingPurchased = false;
+
+
+            // Loop through all upgrades to check if the "enemy_spawner" upgrade is purchased
+            for (Upgrade upgrade : upgrades) {
+                if ("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() > 0) {
+                    isEnemySpawnerPurchased = true;
+                }
+                if ("auto_shot".equals(upgrade.getId()) && upgrade.getAmount() > 0){
+                    isShootingPurchased = true;
+                }
+            }
+
+            // Start the enemy spawn loop if purchased
+            if (isEnemySpawnerPurchased) {
+                startEnemySpawnLoop();
+            }
+            if (isShootingPurchased) {
+                startAutomaticShooting();
+            }
+
+
+        }).start();
 
         // Užtikriname, kad priešų skaitiklis būtų 0, kai grįžtama į fragmentą
         enemyCount = 0;
-        updateEnemyCountDisplay();
+        updateEnemyCountDisplay(); // Update the enemy count display
     }
+
+
     @Override
     public void onPause() {
         super.onPause();
@@ -405,11 +463,5 @@ public class PlayFragment extends Fragment {
             shootHandler.postDelayed(this, 1000); // Šaudo kas 1 sekundę
         }
     };
-
-
-
-
-
-
 
 }

@@ -38,9 +38,9 @@ public class RebirthFragment extends Fragment {
     public void setUpgradesFragment(UpgradesFragment upgradesFragment) {
         this.upgradesFragment = upgradesFragment;
     }
-    private void resetGameData() {
+    public void resetGameData() {
         if (mainActivity == null) {
-            Toast.makeText(getContext(), "Klaida: Pagrindinė veikla nepasiekiama!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Error: Main activity not accessible!", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -53,9 +53,15 @@ public class RebirthFragment extends Fragment {
         // Reset the score
         mainActivity.resetScore();
 
-        // Stop point generation through upgradesFragment
-        if (upgradesFragment != null) {
-            upgradesFragment.stopPointGeneration();
-        }
+        // Reset upgrades in the database
+        AppDatabase db = AppDatabase.getInstance(getContext());
+        new Thread(() -> {
+            db.upgradeDAO().resetAllUpgrades(); // Reset all upgrades in the database
+            // You can also log or notify here if needed
+        }).start();
+
+        // Stop point generation through UpgradeManager
+        UpgradeManager.stopPointGeneration(); // Stop point generation in the UpgradeManager
     }
+
 }
