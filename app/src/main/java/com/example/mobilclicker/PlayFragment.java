@@ -70,15 +70,7 @@ public class PlayFragment extends Fragment {
         _button.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-                // Use a background thread to query the database
 
-                long startTime = System.currentTimeMillis();
-                pressStartTime = startTime;
-                addPoint();
-                _textview.setText("" + _score);
-                float touchX = event.getRawX();
-                float touchY = event.getRawY();
-                shootAtEnemy();
 
                 new Thread(() -> {
                     AppDatabase db = AppDatabase.getInstance(getContext());
@@ -119,8 +111,6 @@ public class PlayFragment extends Fragment {
                     });
                 }).start();
             }
-
-            return true;  // Return true to indicate that the event has been handled
 
             if (event.getAction() == MotionEvent.ACTION_UP)
             {

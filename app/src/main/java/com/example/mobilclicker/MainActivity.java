@@ -31,6 +31,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     boolean isUser = true;
@@ -183,40 +184,14 @@ public class MainActivity extends AppCompatActivity {
             // Insert all new upgrades into the database
             db.upgradeDAO().insertAll(upgradesToInsert);
             Log.d("UpgradeInit", "Re-inserted all default upgrades into database");
-        }).start();
+        }).start();}
 
   
     public void setColorBg(int BGcolor)
     {
         getWindow().getDecorView().setBackgroundColor(BGcolor);
     }
-      
-    /*
-    public void clickPopup()
-    {
-        TextView popup = new TextView(this);
-        popup.setText("+" + clickpower);
-        popup.setTextSize(24f);
-        popup.setTextColor(Color.YELLOW);
-        //popup.setTypeface(null, Typeface.BOLD);
-        popup.setAlpha(0f);
 
-        RelativeLayout rootLayout = findViewById(R.id.tempLayout);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.addRule(RelativeLayout.CENTER_IN_PARENT);
-        popup.setLayoutParams(params);
-        rootLayout.addView(popup);
-        popup.animate()
-                .alpha(1f)
-                .translationYBy(-100f)
-                .setDuration(700)
-                .withEndAction(() -> rootLayout.removeView(popup))
-                .start();
-
-    }
 
 
     public void setCurrentProfileId(long id) {
