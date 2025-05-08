@@ -2,8 +2,13 @@ package com.example.mobilclicker;
 
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -54,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
 
         // Initialize BottomNavigationView
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -134,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 View navView = bottomNavigationView.findViewById(R.id.nav_settings);
                 Animation set = AnimationUtils.loadAnimation(this, R.anim.hyperspace_jump);
                 navView.startAnimation(set);
+
             }
 
             if (selectedFragment != null) {
@@ -164,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
             // List of upgrades to insert
             List<Upgrade> upgradesToInsert = new ArrayList<>();
 
+
             // Example: Convert UpgradeDefinitions to Upgrade entities
             for (UpgradeDefinition def : UpgradeManager.getAllDefinitions()) {
                 // Directly map the definition to an Upgrade entity
@@ -174,6 +184,38 @@ public class MainActivity extends AppCompatActivity {
             db.upgradeDAO().insertAll(upgradesToInsert);
             Log.d("UpgradeInit", "Re-inserted all default upgrades into database");
         }).start();
+
+  
+    public void setColorBg(int BGcolor)
+    {
+        getWindow().getDecorView().setBackgroundColor(BGcolor);
+    }
+      
+    /*
+    public void clickPopup()
+    {
+        TextView popup = new TextView(this);
+        popup.setText("+" + clickpower);
+        popup.setTextSize(24f);
+        popup.setTextColor(Color.YELLOW);
+        //popup.setTypeface(null, Typeface.BOLD);
+        popup.setAlpha(0f);
+
+        RelativeLayout rootLayout = findViewById(R.id.tempLayout);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        popup.setLayoutParams(params);
+        rootLayout.addView(popup);
+        popup.animate()
+                .alpha(1f)
+                .translationYBy(-100f)
+                .setDuration(700)
+                .withEndAction(() -> rootLayout.removeView(popup))
+                .start();
+
     }
 
 

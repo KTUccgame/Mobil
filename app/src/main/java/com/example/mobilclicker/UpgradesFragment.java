@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.util.HashMap;
@@ -18,14 +19,19 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UpgradesFragment extends Fragment {
+    private MainActivity mainActivity;
     private PlayFragment playFragment;
     private AtomicBoolean isGeneratorActive = new AtomicBoolean(false);
     private Handler handler = new Handler();
+
 
     private Map<String, Integer> upgradeLevels = new HashMap<>();
     private Map<String, Integer> upgradePrices = new HashMap<>();
     private LinearLayout upgradesLayout;
     private int generatorsOwned = 0;
+
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,7 +53,9 @@ public class UpgradesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_upgrades, container, false);
 
+
         upgradesLayout = view.findViewById(R.id.upgrades_layout);
+
 
         fetchUpgradesFromDatabase();
 
@@ -164,7 +172,6 @@ public class UpgradesFragment extends Fragment {
     }
 
 
-
     public void resetUpgrades() {
         generatorsOwned = 0;
         upgradeLevels.clear();
@@ -205,9 +212,11 @@ public class UpgradesFragment extends Fragment {
     }
 
 
+
     private boolean isAdmin() {
         AppDatabase2 db = AppDatabase2.getInstance(getContext());
         ProfileSettingsDAO profileSettingsDAO = db.profileDAO();
+
 
         MainActivity mainActivity = (MainActivity) getActivity();
         long currentProfileId = mainActivity.currentProfileId;
@@ -217,3 +226,4 @@ public class UpgradesFragment extends Fragment {
     }
 
 }
+

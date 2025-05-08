@@ -24,6 +24,7 @@
 
     <Button
         android:id="@+id/edit_Button"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="55dp"
@@ -48,6 +49,7 @@
         android:layout_height="289dp"
         android:layout_marginTop="36dp"
         app:layout_constraintBottom_toTopOf="@+id/edit_Button"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

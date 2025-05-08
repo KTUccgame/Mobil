@@ -1,6 +1,8 @@
 package com.example.mobilclicker;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,17 +10,26 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 public class SettingsFragment extends Fragment {
+
     private MainActivity mainActivity;
     private final String adminPW = "aa";
     private long currentProfileId = 1;
@@ -32,6 +43,9 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
+
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         mainActivity = (MainActivity) getActivity();
 
@@ -65,12 +79,60 @@ public class SettingsFragment extends Fragment {
             loadProfileSettings(3);
         });
         creditsButton.setOnClickListener(v -> {
-            // popup info about people who made the appx
-            // make textbox read info from .txt file?
+            Context context = v.getContext();
 
+            View popupView = inflater.inflate(R.layout.popup_layout, null);
+            popupView.setBackgroundColor(Color.WHITE);
+            int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+            int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            boolean focusable = true; // close when click outside popup
+
+
+            if (width < 600) width = 600;
+            if (height < 600) height = 600;
+            final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+
+            TextView textView = popupView.findViewById(R.id.popup_text);
+
+            try {
+                InputStream is;
+                try {
+                    is = context.getAssets().open("credits.txt");
+                } catch (IOException e) {
+                    is = context.getResources().openRawResource(R.raw.credits);
+                }
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                StringBuilder stringBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line).append("\n");
+                }
+                textView.setText(stringBuilder.toString());
+                is.close();
+            } catch (IOException e) {
+                textView.setText("Couldn't load credits");
+                e.printStackTrace();
+            }
+            Button closeButton = popupView.findViewById(R.id.popup_close);
+            closeButton.setOnClickListener(v1 -> popupWindow.dismiss());
+            popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
+            /*
+            // Dim background when popup appears
+            View container = popupWindow.getContentView().getRootView();
+            if (container != null) {
+                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                WindowManager.LayoutParams p = (WindowManager.LayoutParams) container.getLayoutParams();
+                p.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIIND;
+                p.dimAmount = 0.5f; // Dim level (0.0f to 1.0f)
+                wm.updateViewLayout(container, p);
+            }
+            */
             Animation hyperspaceJump = AnimationUtils.loadAnimation(this.mainActivity, R.anim.hyperspace_jump);
             image.startAnimation(hyperspaceJump);
         });
+
+
         adminButton.setOnClickListener(v -> {
             if(adminPW.contentEquals(adminText.getText()))
             {
@@ -177,7 +239,7 @@ public class SettingsFragment extends Fragment {
             profile.setVolumeBox(volumeBox.isChecked());
             profile.setNumberBox(numberBox.isChecked());
             profile.setFourthBox(fourthBox.isChecked());
-            //profile.setAdminCheck(!mainActivity.isUser); not needed ... i think ...
+            profile.setAdminCheck(!mainActivity.isUser);
             dao.updateProfile(profile);
         }).start();
     }
