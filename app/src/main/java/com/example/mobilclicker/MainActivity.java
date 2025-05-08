@@ -47,11 +47,24 @@ public class MainActivity extends AppCompatActivity {
     private AppDatabase db; // Declare the Room database
 
 
+    // Tikimybė kiekvienam fonui (sumos turėtų būti 100)
+    // Tikimybės, kad fonas pasirodys: 7 fonai, pvz., 10%, 20%, 15%, 5%, 10%, 25%, 15%
+    int[] probabilities = {20, 20, 20, 1, 5, 10, 1};
+
+
+
+
+
+
     private int currentBackgroundIndex = 0;
     private int[] backgrounds = {
             R.drawable.menu_background_1,
             R.drawable.menu_background_2,
-            R.drawable.menu_background_3
+            R.drawable.menu_background_3,
+            R.drawable.menu_background_4,
+            R.drawable.menu_background_5,
+            R.drawable.menu_background_6,
+            R.drawable.menu_background_7
     };
 
 
@@ -60,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
 
 
@@ -74,10 +89,24 @@ public class MainActivity extends AppCompatActivity {
 
 
         shakeDetector.setOnShakeListener(() -> {
-            // Keičiam foną į sekantį
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgrounds.length;
-            bottomNavigationView.setBackgroundResource(backgrounds[currentBackgroundIndex]);
+            // Generuojame atsitiktinį skaičių nuo 0 iki 100
+            int randomChance = new Random().nextInt(100); // Atsitiktinis skaičius nuo 0 iki 99
+
+            // Kuriame akumuliuotą tikimybę
+            int accumulatedChance = 0;
+            for (int i = 0; i < probabilities.length; i++) {
+                accumulatedChance += probabilities[i];
+
+                // Jei atsitiktinis skaičius yra mažesnis už akumuliuotą tikimybę, pasirinkime tą foną
+                if (randomChance < accumulatedChance) {
+                    currentBackgroundIndex = i;  // Pasirenkame foną pagal indeksą
+                    bottomNavigationView.setBackgroundResource(backgrounds[currentBackgroundIndex]);
+                    break;  // Baigiame ciklą, nes radome, kuris fonas bus pasirinktas
+                }
+            }
         });
+
+
 
 
 
