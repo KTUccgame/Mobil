@@ -12,30 +12,31 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/grass_background"/>
+        android:src="@drawable/grass_background" />
 
     <!-- Tekstas arba statuso informacija -->
     <TextView
         android:id="@+id/textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:text="Hello World!"
+        android:textColor="@color/bg_settings"
         android:textSize="24sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/enemy_count_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enemy Count"
+        android:textColor="@color/bg_settings"
         android:textSize="24sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/textview"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/textview" />
 
     <!-- Mygtukas, kuris aktyvuos veiksmą -->
     <ImageButton
