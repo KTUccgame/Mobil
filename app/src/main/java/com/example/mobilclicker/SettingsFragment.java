@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -20,7 +21,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
 import java.io.BufferedReader;
@@ -35,19 +39,41 @@ public class SettingsFragment extends Fragment {
     private long currentProfileId = 1;
     private CheckBox soundBox, volumeBox, numberBox, fourthBox;
 
+
+    private static final int FILE_REQUEST_CODE = 1;
+    private TextView fileContentTextView;
+
+    private ActivityResultLauncher<String> mGetContent;
+
+
     TextView profileText;
     public SettingsFragment() {
         // empty to not break app
     }
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
 
-
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         mainActivity = (MainActivity) getActivity();
+
+
+        Button uploadButton = view.findViewById(R.id.upload_button);
+        fileContentTextView = view.findViewById(R.id.file_content_textview);
+
+
+        mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (uri != null) {
+                // Failo pasirinkimo rezultatas
+                readFileContent(uri);
+            }
+        });
+
+        uploadButton.setOnClickListener(v -> openFilePicker());
 
         Button profile1Button = view.findViewById(R.id.profile_1_button);
         Button profile2Button = view.findViewById(R.id.profile_2_button);
@@ -255,6 +281,30 @@ public class SettingsFragment extends Fragment {
 
         }).start();
     }
+
+    private void openFilePicker() {
+        // Paleidžiame failų pasirinkimo dialogą
+        mGetContent.launch("text/plain"); // Filtruoti tik tekstinius failus
+    }
+
+
+    private void readFileContent(Uri fileUri) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(getContext().getContentResolver().openInputStream(fileUri)));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line).append("\n");
+            }
+            reader.close();
+
+            // Parodome failo turinį TextView
+            fileContentTextView.setText(stringBuilder.toString());
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Failed to read file", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
 }
 

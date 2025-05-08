@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {Upgrade.class}, version = 9, exportSchema = false)
+@Database(entities = {Upgrade.class}, version = 10 , exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     // Abstract method for DAO access

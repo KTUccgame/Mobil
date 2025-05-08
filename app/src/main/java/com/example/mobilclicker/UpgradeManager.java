@@ -2,6 +2,7 @@ package com.example.mobilclicker;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.view.MotionEvent;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -87,6 +88,20 @@ public class UpgradeManager {
                 false, // Initially locked
                 10 // Maximum amount
         ));
+
+        // Pridedame upgrade, kuris aktyvuoja dvigubus taškus, kai naudojami trys pirštai
+        upgradeDefinitions.put("triple_points_with_three_fingers", new UpgradeDefinition(
+                "triple_points_with_three_fingers",
+                "Triple Points with Three Fingers",
+                50,  // Kaina už upgrade
+                0,   // Reikia 0 taškų pradžioje
+                "Get triple points when clicking with three fingers.",
+                false,  // Užrakinta iš pradžių
+                List.of(),  // Reikalauja 'clicking' upgrade
+                false,  // Iš pradžių užrakinta
+                1  // Vienas max
+        ));
+
 
 
 
@@ -190,4 +205,8 @@ public class UpgradeManager {
             action.run();
         }
     }
+
+
+
+
 }

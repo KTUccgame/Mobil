@@ -53,9 +53,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
-
     private int currentBackgroundIndex = 0;
     private int[] backgrounds = {
             R.drawable.menu_background_1,
@@ -73,10 +70,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-
-
 
 
         // Initialize BottomNavigationView
@@ -137,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 Animation set = AnimationUtils.loadAnimation(this, R.anim.play_extender);
                 navView.startAnimation(set);
             } else if (itemId == R.id.nav_upgrades) {
+                Log.i("a", "clicked on Upgrades");
                 if (upgradesFragment == null) {
                     upgradesFragment = new UpgradesFragment();
 
@@ -151,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } else if (itemId == R.id.nav_rebirth) {
+                Log.i("a", "clicked on Rebirth tab");
                 if (rebirthFragment == null) {
                     rebirthFragment = new RebirthFragment();
                     rebirthFragment.setUpgradesFragment(upgradesFragment);
@@ -197,25 +192,36 @@ public class MainActivity extends AppCompatActivity {
     // This method will insert default upgrades into the database if they don't already exist
     public void initializeUpgradesIfNeeded(AppDatabase db) {
         new Thread(() -> {
-            // Clear existing upgrades from the database
-            db.upgradeDAO().deleteAll();
+            // Gauti visus įrašus iš duomenų bazės
+            List<Upgrade> existingUpgrades = db.upgradeDAO().getAllUpgrades();
 
             // List of upgrades to insert
             List<Upgrade> upgradesToInsert = new ArrayList<>();
+            List<String> upgradeIdsInManager = new ArrayList<>();
 
-
-            // Example: Convert UpgradeDefinitions to Upgrade entities
+            // Pirmiausia pridedame tuos, kurie nėra duomenų bazėje
             for (UpgradeDefinition def : UpgradeManager.getAllDefinitions()) {
-                // Directly map the definition to an Upgrade entity
-                upgradesToInsert.add(UpgradeMapper.fromDefinition(def));
+                String id = def.getId();
+                upgradeIdsInManager.add(id);  // Įrašome visus ID, esančius UpgradeManager
+
+                // Patikriname, ar šis ID jau egzistuoja duomenų bazėje
+                if (db.upgradeDAO().getUpgradeById(id) == null) {
+                    upgradesToInsert.add(UpgradeMapper.fromDefinition(def));  // Jei nėra, pridedame į įrašų sąrašą
+                }
             }
 
-            // Insert all new upgrades into the database
-            db.upgradeDAO().insertAll(upgradesToInsert);
-            Log.d("UpgradeInit", "Re-inserted all default upgrades into database");
-        }).start();}
+            // Pašaliname visus įrašus, kurių ID nėra sąraše
+            db.upgradeDAO().deleteByIdsNotInList(upgradeIdsInManager);
 
-  
+            // Įterpiame visus naujus upgrade įrašus
+            db.upgradeDAO().insertAll(upgradesToInsert);
+            Log.d("UpgradeInit", "Re-inserted new upgrades and removed outdated ones.");
+        }).start();
+    }
+
+
+
+
     public void setColorBg(int BGcolor)
     {
         getWindow().getDecorView().setBackgroundColor(BGcolor);

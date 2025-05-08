@@ -50,4 +50,7 @@ public interface UpgradeDAO {
 
     @Query("UPDATE upgrade SET upgrade_amount = 0, upgrade_cost = upgrade_base_value")
     void resetAllUpgrades();
+
+    @Query("DELETE FROM upgrade WHERE id NOT IN (:ids)")
+    void deleteByIdsNotInList(List<String> ids);
 }

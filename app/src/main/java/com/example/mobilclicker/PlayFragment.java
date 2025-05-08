@@ -44,6 +44,8 @@ public class PlayFragment extends Fragment {
 
     private int enemyCount = 0;
 
+    boolean isTriplePurchased = false;
+
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
@@ -54,6 +56,27 @@ public class PlayFragment extends Fragment {
         _textview = view.findViewById(R.id.textview);
         _button = view.findViewById(R.id.button);
 
+        ImageView backgroundImage = view.findViewById(R.id.background_image);  // Rasti ImageView su id background_image
+
+
+        backgroundImage.setOnTouchListener((v, event) -> {
+            int pointerCount = event.getPointerCount();  // Gauti pirštų skaičių
+
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN || event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
+                if (pointerCount == 2) {
+                    // Jeigu buvo paspausti 2 pirštai
+                    Toast.makeText(getContext(), "2 fingers detected on background!", Toast.LENGTH_SHORT).show();
+                } else if (pointerCount == 3) {
+                    // Jeigu buvo paspausti 3 pirštai
+                    Toast.makeText(getContext(), "3 fingers detected on background!", Toast.LENGTH_SHORT).show();
+                    if(isTriplePurchased)
+                        addPoint(clickpower*3);
+
+                }
+            }
+            return true;
+        });
+
         // Inicializuojame duomenų bazę
         _db = AppActivity.getDatabase();
         _upgradeDAO = _db.upgradeDAO();
@@ -61,7 +84,6 @@ public class PlayFragment extends Fragment {
         _profileDAO = _db2.profileDAO();
 
         // Bokšto animacija
-
         _button.setBackgroundResource(R.drawable.tower_animation);
         AnimationDrawable towerAnimation = (AnimationDrawable) _button.getBackground();
         _button.setImageDrawable(null);
@@ -70,7 +92,7 @@ public class PlayFragment extends Fragment {
         _button.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-
+                pressStartTime = System.currentTimeMillis();
 
                 new Thread(() -> {
                     AppDatabase db = AppDatabase.getInstance(getContext());
@@ -135,11 +157,12 @@ public class PlayFragment extends Fragment {
         return view;
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
+        loadClickPowerFromDatabase();
         refreshScore(); // Grįžus į fragmentą, atnaujiname taškų skaičių
-
         if(enemyCount<0)
             enemyCount=0;
         // Start the enemy spawn loop if the enemy spawner upgrade is purchased
@@ -158,6 +181,9 @@ public class PlayFragment extends Fragment {
                 }
                 if ("auto_shot".equals(upgrade.getId()) && upgrade.getAmount() > 0){
                     isShootingPurchased = true;
+                }
+                if ("triple_points_with_three_fingers".equals(upgrade.getId()) && upgrade.getAmount() > 0){
+                    isTriplePurchased = true;
                 }
             }
 
@@ -214,9 +240,7 @@ public class PlayFragment extends Fragment {
     public void increaseClickPower() {
         clickpower++;
     }
-    public void resetClickPower() {
-        clickpower = 1;
-    }
+
     public void setCurrentProfileId(long id) {
         currentProfileId = id;
     }
@@ -374,11 +398,6 @@ public class PlayFragment extends Fragment {
     };
 
 
-
-
-
-
-
     private void startEnemySpawnLoop() {
         if (isResumed()) { // Patikriname, ar fragmentas yra aktyvus
             handler.post(enemySpawnTask);
@@ -484,5 +503,24 @@ public class PlayFragment extends Fragment {
             shootHandler.postDelayed(this, 1000); // Šaudo kas 1 sekundę
         }
     };
+
+    private void loadClickPowerFromDatabase() {
+        AppDatabase db = AppDatabase.getInstance(getContext());
+        _upgradeDAO = db.upgradeDAO();
+
+        new Thread(() -> {
+            Upgrade upgrade = _upgradeDAO.getUpgradeById("clicking_power");
+            if (upgrade != null) {
+                clickpower = upgrade.getAmount() + 1; // Jei naudoji 'amount' kaip lygį
+            } else {
+                clickpower = 1; // default
+            }
+
+            requireActivity().runOnUiThread(() -> {
+                Log.d("ClickPower", "Loaded click power: " + clickpower);
+            });
+        }).start();
+    }
+
 
 }
