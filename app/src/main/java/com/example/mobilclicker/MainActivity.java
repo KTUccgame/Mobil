@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (itemId == R.id.nav_play) {
 
-                Log.i("a", "clicked on play i think OUTSIDE");
+                Log.i("debug", "clicked on play i think OUTSIDE");
                 // ANIM HERE
                 if (playFragment == null) {
                     playFragment = new PlayFragment();
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 Animation set = AnimationUtils.loadAnimation(this, R.anim.play_extender);
                 navView.startAnimation(set);
             } else if (itemId == R.id.nav_upgrades) {
-                Log.i("a", "clicked on Upgrades");
+                Log.i("debug", "clicked on Upgrades");
                 if (upgradesFragment == null) {
                     upgradesFragment = new UpgradesFragment();
 
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } else if (itemId == R.id.nav_rebirth) {
-                Log.i("a", "clicked on Rebirth tab");
+                Log.i("debug", "clicked on Rebirth tab");
                 if (rebirthFragment == null) {
                     rebirthFragment = new RebirthFragment();
                     rebirthFragment.setUpgradesFragment(upgradesFragment);
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
             } else if (itemId == R.id.nav_settings) {
 
-                Log.i("a", "clicked on settings i think");
+                Log.i("debug", "clicked on settings i think");
                 selectedFragment = new SettingsFragment();
                 View navView = bottomNavigationView.findViewById(R.id.nav_settings);
                 Animation set = AnimationUtils.loadAnimation(this, R.anim.hyperspace_jump);
