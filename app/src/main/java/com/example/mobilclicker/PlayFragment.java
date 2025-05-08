@@ -160,6 +160,7 @@ public class PlayFragment extends Fragment {
 
     @Override
     public void onResume() {
+        isTriplePurchased = false;
         super.onResume();
         loadClickPowerFromDatabase();
         refreshScore(); // Grįžus į fragmentą, atnaujiname taškų skaičių
@@ -185,6 +186,7 @@ public class PlayFragment extends Fragment {
                 if ("triple_points_with_three_fingers".equals(upgrade.getId()) && upgrade.getAmount() > 0){
                     isTriplePurchased = true;
                 }
+
             }
 
             // Start the enemy spawn loop if purchased
