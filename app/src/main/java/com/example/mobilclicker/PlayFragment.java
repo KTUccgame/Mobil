@@ -29,6 +29,7 @@ public class PlayFragment extends Fragment {
     private TextView _textview;
     private ImageButton _button;
     private int _score = 0;
+    private float clickMultiplier = 1;
     private int clickpower = 1;
     private AppDatabase _db;
     private AppDatabase2 _db2;
@@ -41,9 +42,7 @@ public class PlayFragment extends Fragment {
     private long timeElapsed = 0; // Laikas, praleistas žaidime (milisekundėmis)
     private long timeForNextIncrease = 30000; // Laikas po kurio priešų atsiradimo dažnis padidės (pavyzdžiui, kas 30 sekundžių)
     private long startTime; // Laiko žymė žaidimo pradžiai
-
     private int enemyCount = 0;
-
     boolean isTriplePurchased = false;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -106,7 +105,7 @@ public class PlayFragment extends Fragment {
                         if (isClickerPurchased) {
                             // Perform the click action only if the clicker upgrade is purchased
                             addPoint(); // Add points to the score
-                            _textview.setText("" + _score); // Update the score display
+                            _textview.setText("" + _score ); // Update the score display
 
                             // Get the touch position
                             float touchX = event.getRawX();
@@ -219,8 +218,16 @@ public class PlayFragment extends Fragment {
         stopAutomaticShooting(); // Sustabdo automatinį šaudymą
     }
     public void addPoint() {
-        _score += clickpower;
+        _score += clickpower * clickMultiplier;
         refreshScore();
+    }
+    public void setClickMultiplier(float additionalMult)
+    {
+        clickMultiplier += additionalMult;
+    }
+    public float getClickMultiplier()
+    {
+        return clickMultiplier;
     }
     public void updateScore(int score) {
         _score = score; // Priimame naują reikšmę
@@ -529,6 +536,5 @@ public class PlayFragment extends Fragment {
             });
         }).start();
     }
-
 
 }

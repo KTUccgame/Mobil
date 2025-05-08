@@ -30,5 +30,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <TextView
+        android:id="@+id/rebirth_level_textbox"
+        android:layout_width="125dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="140dp"
+        android:layout_marginTop="64dp"
+        android:text="Rebirth information"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reset_button" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

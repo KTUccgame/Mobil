@@ -31,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
     private UpgradesFragment upgradesFragment;
     private RebirthFragment rebirthFragment;
     private PlayFragment playFragment;
-
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private ShakeDetector shakeDetector;
+    public float rebirthPointMultiplier = 1;
 
     private AppDatabase db; // Declare the Room database
 
@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                 // ANIM HERE
                 if (playFragment == null) {
                     playFragment = new PlayFragment();
+
                 }
                 selectedFragment = playFragment;
                 View navView = bottomNavigationView.findViewById(R.id.nav_play);
@@ -143,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 if (rebirthFragment == null) {
                     rebirthFragment = new RebirthFragment();
                     rebirthFragment.setUpgradesFragment(upgradesFragment);
+                    rebirthFragment.setPlayFragment(playFragment);
                 }
                 selectedFragment = rebirthFragment;
                 // ANIMACIJA ant nav_rebirth mygtuko
@@ -212,24 +214,14 @@ public class MainActivity extends AppCompatActivity {
             Log.d("UpgradeInit", "Re-inserted new upgrades and removed outdated ones.");
         }).start();
     }
-
-
-
-
     public void setColorBg(int BGcolor)
     {
         getWindow().getDecorView().setBackgroundColor(BGcolor);
     }
-
-
-
     public void setCurrentProfileId(long id) {
         currentProfileId = id;
     }
-
-    // Reset score and stop point generation
     public void resetScore() {
-
         // Pasirūpiname, kad PlayFragment atnaujintų rezultatą
         if (playFragment != null) {
             playFragment.updateScore(0);
@@ -237,7 +229,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
     public void setAdminStatus(long profileId, boolean isAdmin) {
         new Thread(() -> {
             AppDatabase2 db = AppDatabase2.getInstance(getApplicationContext());
