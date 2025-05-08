@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -87,7 +88,6 @@ public class PlayFragment extends Fragment {
         AnimationDrawable towerAnimation = (AnimationDrawable) _button.getBackground();
         _button.setImageDrawable(null);
         towerAnimation.start();
-
         _button.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
@@ -178,6 +178,13 @@ public class PlayFragment extends Fragment {
             for (Upgrade upgrade : upgrades) {
                 if ("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() > 0) {
                     isEnemySpawnerPurchased = true;
+                    spawnDelay=5000;
+                    if("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() == 2){
+                      spawnDelay= 1500;
+                    }
+                    if("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() == 3){
+                        spawnDelay= 500;
+                    }
                 }
                 if ("auto_shot".equals(upgrade.getId()) && upgrade.getAmount() > 0){
                     isShootingPurchased = true;
@@ -374,7 +381,7 @@ public class PlayFragment extends Fragment {
         enemyList.remove(enemy); // Pašaliname priešą iš sąrašo
     }
     private Handler handler = new Handler();
-    private long spawnDelay = 2000; // Pradinis atsiradimo greitis (2000ms arba 2 sekundės)
+    private long spawnDelay = 5000; // Pradinis atsiradimo greitis (2000ms arba 2 sekundės)
     private int additionalEnemies = 0; // Papildomų priešų skaičius
     private Runnable enemySpawnTask = new Runnable() {
         @Override
@@ -385,7 +392,7 @@ public class PlayFragment extends Fragment {
             additionalEnemies++;
 
             // Padidiname atsiradimo greitį (sumenkinti vėlavimą)
-            spawnDelay = Math.max(500, spawnDelay - 100); // Nesumažinkite vėlavimo žemiau 500ms
+            //spawnDelay = Math.max(500, spawnDelay - 100); // Nesumažinkite vėlavimo žemiau 500ms
 
             // Kiekvieną sekundę, atsiradimo greitis trumpėja + pridedame daugiau priešų
             if (additionalEnemies >= 2) {

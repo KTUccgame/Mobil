@@ -61,7 +61,7 @@ public class UpgradeManager {
                 false, // Initially locked
                 List.of(), // Can be unlocked after clicking upgrade
                 false, // Initially locked
-                1 // Maximum amount
+                3 // Maximum amount
         ));
 
         upgradeDefinitions.put("auto_shot", new UpgradeDefinition(
