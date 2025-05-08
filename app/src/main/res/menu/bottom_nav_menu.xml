@@ -7,7 +7,7 @@
         android:id="@+id/nav_play"
         android:icon="@drawable/play_button_xml"
         tools:ignore="MenuTitle" />
-        <!-- android:onClick="onPlayClicked" -->
+
     <!-- Upgrades -->
     <item
         android:id="@+id/nav_upgrades"
@@ -17,7 +17,6 @@
     <!-- Rebirth -->
     <item
         android:id="@+id/nav_rebirth"
-
         android:icon="@drawable/circle_with_arrow"
         tools:ignore="MenuTitle" />
 
@@ -26,8 +25,8 @@
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/options_button_xml"
-        tools:ignore="MenuTitle" />
-    <!--android:onClick="onSettingsClicked"-->
+        tools:ignore="MenuTitle"
+        android:checkable="false"/>
 
 
 </menu>

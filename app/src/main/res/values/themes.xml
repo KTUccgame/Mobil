@@ -6,4 +6,18 @@
     </style>
 
     <style name="Theme.MobilClicker" parent="Base.Theme.MobilClicker" />
+
+
+    <!-- Custom theme for BottomNavigationView -->
+    <style name="CustomNavTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Remove highlight color (no background change on selected item) -->
+        <item name="colorControlHighlight">@android:color/transparent</item>
+
+        <!-- Optional: Set icon and text color for items -->
+        <item name="colorPrimary">#6200EE</item> <!-- Primary color for selected item -->
+        <item name="colorOnPrimary">#FFFFFF</item> <!-- Icon color for selected item -->
+
+    </style>
+
+
 </resources>

@@ -111,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
         // Initialize upgrades if needed (insert defaults if they don't exist in the DB)
         initializeUpgradesIfNeeded(db);
 
+
+
         // Fragmentų valdymas
         bottomNavigationView.setOnItemSelectedListener(item -> {
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -154,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
                 // ANIMACIJA ant nav_rebirth mygtuko
                 View navView = bottomNavigationView.findViewById(R.id.nav_rebirth);
                 if (navView != null) {
-                    ObjectAnimator animator = ObjectAnimator.ofFloat(navView, "rotationY", 0f, 360f);
+                    ObjectAnimator animator = ObjectAnimator.ofFloat(navView, "rotation", 0f, 360f);
                     animator.setDuration(600);
                     animator.setInterpolator(new AccelerateDecelerateInterpolator());
                     animator.start();
