@@ -23,4 +23,13 @@ public interface ProfileSettingsDAO {
     void insertAll(ProfileSettings... users);
     @Delete
     void delete(ProfileSettings user);
+
+    @Query("SELECT adminCheck FROM ProfileSettings WHERE id = :profileId LIMIT 1")
+    boolean isUserAdmin(long profileId);
+
+    @Update
+    void updateAdminStatus(ProfileSettings profile);
+
+    @Query("SELECT * FROM ProfileSettings WHERE id = :profileId LIMIT 1")
+    ProfileSettings findById(long profileId);
 }
