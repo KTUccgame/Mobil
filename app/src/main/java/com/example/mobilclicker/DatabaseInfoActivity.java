@@ -1,7 +1,6 @@
 package com.example.mobilclicker;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.widget.SearchView;
+import android.widget.Toast;
 
 public class DatabaseInfoActivity extends AppCompatActivity {
 
@@ -34,10 +34,7 @@ public class DatabaseInfoActivity extends AppCompatActivity {
         new Thread(() -> {
             List<Upgrade> upgrades = db.upgradeDAO().getAllUpgrades();
             if (upgrades.isEmpty()) {
-                for (UpgradeDefinition def : UpgradeManager.getAllDefinitions()) {
-                    Upgrade upgrade = UpgradeMapper.fromDefinition(def);
-                    db.upgradeDAO().insert(upgrade);
-                }
+                Toast.makeText(this, "Could not get data from database", Toast.LENGTH_SHORT).show();
             }
         }).start();
     }
@@ -93,7 +90,7 @@ public class DatabaseInfoActivity extends AppCompatActivity {
         }
 
         if (databaseInfo.length() == 0) {
-            databaseInfo.append("Nieko nerasta pagal paiešką.");
+            databaseInfo.append("Nothing found.");
         }
 
         databaseInfoTextView.setText(databaseInfo.toString());
