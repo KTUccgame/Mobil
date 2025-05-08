@@ -4,11 +4,6 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,10 +23,7 @@ import java.util.List;
 import java.util.Random;
 
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     boolean isUser = true;

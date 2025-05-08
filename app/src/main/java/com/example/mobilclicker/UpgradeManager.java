@@ -2,7 +2,6 @@ package com.example.mobilclicker;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.view.MotionEvent;
 
 import java.util.Collection;
 import java.util.HashMap;
