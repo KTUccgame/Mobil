@@ -17,6 +17,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.038"
         tools:ignore="HardcodedText" />
 
     <Button
@@ -32,14 +33,97 @@
 
     <TextView
         android:id="@+id/rebirth_level_textbox"
-        android:layout_width="125dp"
+        android:layout_width="175dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="140dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginStart="116dp"
+        android:layout_marginTop="60dp"
         android:text="Rebirth information"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/reset_button" />
 
+    <LinearLayout
+        android:layout_width="256dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="76dp"
+        android:layout_marginBottom="88dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/rebirth_option_one"
+                android:layout_width="128dp"
+                android:layout_height="64dp"
+                android:drawableRight="@drawable/tower1_small"
+                android:drawablePadding="8dp"
+                android:drawableTint="@null"
+                android:gravity="center_vertical|start"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp"
+                android:singleLine="true"
+                android:text="Default" />
+            <Button
+                android:id="@+id/rebirth_option_two"
+                android:layout_width="128dp"
+                android:layout_height="64dp"
+                android:text="Button" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/rebirth_option_three"
+                android:layout_width="128dp"
+                android:layout_height="64dp"
+                android:drawableRight="@drawable/towergyro_small"
+                android:drawablePadding="8dp"
+                android:drawableTint="@null"
+                android:gravity="center_vertical|start"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp"
+                android:singleLine="true"
+                android:text="Gyro 2" />
+            <Button
+                android:id="@+id/rebirth_option_four"
+                android:layout_width="128dp"
+                android:layout_height="64dp"
+                android:layout_weight="1"
+                android:text="Button" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/rebirth_option_five"
+                android:layout_width="128dp"
+                android:layout_height="64dp"
+                android:drawableRight="@drawable/towergold_small"
+                android:drawablePadding="8dp"
+                android:drawableTint="@null"
+                android:gravity="center_vertical|start"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp"
+                android:singleLine="true"
+                android:text="Gold 3" />
+            <Button
+                android:id="@+id/rebirth_option_six"
+                android:layout_width="128dp"
+                android:layout_height="64dp"
+                android:layout_weight="1"
+                android:text="Button" />
+        </LinearLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

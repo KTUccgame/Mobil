@@ -3,9 +3,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
-import android.media.MediaPlayer;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -15,9 +19,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -25,10 +31,11 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayFragment extends Fragment {
+public class PlayFragment extends Fragment implements SensorEventListener {
     private TextView _textview;
     private ImageButton _button;
     private int _score = 0;
+    private double _score_2 = 0;
     private float clickMultiplier = 1;
     private int clickpower = 1;
     private AppDatabase _db;
@@ -44,6 +51,52 @@ public class PlayFragment extends Fragment {
     private long startTime; // Laiko žymė žaidimo pradžiai
     private int enemyCount = 0;
     boolean isTriplePurchased = false;
+    // gyro?
+    private LinearLayout gyroComponent;
+    private MainActivity mainActivity;
+    public int towerType = 0; // 0 default, 1 gyro, 2 gold
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
+    private float[] lastAccelerometer = new float[3];
+    private float[] lastMagnetometer = new float[3];
+    private boolean lastAccelerometerSet = false;
+    private boolean lastMagnetometerSet = false;
+    private ImageView directionIndicator;
+    private TextView directionText;
+    private TextView timerText;
+    private int currentTargetDirection;
+    private long directionMatchStartTime = 0;
+    private boolean isDirectionMatched = false;
+    private Handler timerHandler = new Handler();
+    private Runnable timerRunnable;
+
+    private static final int[] DIRECTIONS = {
+            0, // up
+            1, // right
+            2, // down
+            3  // left
+    };
+    private static final String[] DIRECTION_NAMES = {
+            "Tilt UP",
+            "Tilt RIGHT",
+            "Tilt DOWN",
+            "Tilt LEFT"
+    };
+    private static final int[] DIRECTION_ICONS = {
+            R.drawable.gyro_arrow_up,
+            R.drawable.gyro_arrow_right,
+            R.drawable.gyro_arrow_down,
+            R.drawable.gyro_arrow_left
+    };
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof MainActivity) {
+            mainActivity = (MainActivity) context;
+        }
+    }
+// gyro?
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
@@ -52,31 +105,51 @@ public class PlayFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play, container, false);
 
+
         _textview = view.findViewById(R.id.textview);
         _button = view.findViewById(R.id.button);
 
         ImageView backgroundImage = view.findViewById(R.id.background_image);  // Rasti ImageView su id background_image
+        //gyro?
+        directionIndicator = view.findViewById(R.id.direction_indicator);
+        directionText = view.findViewById(R.id.direction_text);
+        timerText = view.findViewById(R.id.timer_text);
 
-
+        // Initialize sensor manager
+        sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        gyroComponent = view.findViewById(R.id.gyroComponent);
+        //updateGyroVisibility();
+        RebirthFragment rebirthFragment = mainActivity.getRebirthFragment();
+        if ( _score_2>0 )
+        {
+            if ( rebirthFragment.getCurrentTowerType() == 1 )
+            {
+                gyroComponent.setVisibility(View.VISIBLE);
+                // show sensor manager components
+                setNewRandomDirection();
+            }
+        }
+        else
+        {
+            gyroComponent.setVisibility(View.GONE);
+            // hide sensor manager components
+        }
+        //gyro?
         backgroundImage.setOnTouchListener((v, event) -> {
-            int pointerCount = event.getPointerCount();  // Gauti pirštų skaičių
-
+            int pointerCount = event.getPointerCount();
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN || event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
                 if (pointerCount == 2) {
-                    // Jeigu buvo paspausti 2 pirštai
                     Toast.makeText(getContext(), "2 fingers detected on background!", Toast.LENGTH_SHORT).show();
                 } else if (pointerCount == 3) {
-                    // Jeigu buvo paspausti 3 pirštai
                     Toast.makeText(getContext(), "3 fingers detected on background!", Toast.LENGTH_SHORT).show();
                     if(isTriplePurchased)
                         addPoint(clickpower*3);
-
                 }
             }
             return true;
         });
-
-        // Inicializuojame duomenų bazę
         _db = AppActivity.getDatabase();
         _upgradeDAO = _db.upgradeDAO();
         _db2 = AppActivity.getDatabase2();
@@ -204,10 +277,14 @@ public class PlayFragment extends Fragment {
 
 
         }).start();
-
-        // Užtikriname, kad priešų skaitiklis būtų 0, kai grįžtama į fragmentą
         enemyCount = 0;
-        updateEnemyCountDisplay(); // Update the enemy count display
+        updateEnemyCountDisplay();
+        // gyro !!!
+        if (sensorManager != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_GAME);
+        }
+        startTimer();
     }
 
 
@@ -216,6 +293,11 @@ public class PlayFragment extends Fragment {
         super.onPause();
         stopEnemySpawnLoop(); // Sustabdo priešų kūrimo uždelsimą
         stopAutomaticShooting(); // Sustabdo automatinį šaudymą
+        //gyro!!
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
+        stopTimer();
     }
     public void addPoint() {
         _score += clickpower * clickMultiplier;
@@ -537,4 +619,139 @@ public class PlayFragment extends Fragment {
         }).start();
     }
 
+    public double get_score_2() {
+        return _score_2;
+    }
+
+    public void set_score_2(double _score_2) {
+        this._score_2 = _score_2;
+    }
+
+    // gyro?
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor == accelerometer) {
+            System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
+            lastAccelerometerSet = true;
+        } else if (event.sensor == magnetometer) {
+            System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.length);
+            lastMagnetometerSet = true;
+        }
+
+        if (lastAccelerometerSet && lastMagnetometerSet) {
+            float[] rotationMatrix = new float[9];
+            float[] orientation = new float[3];
+
+            if (SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer)) {
+                SensorManager.getOrientation(rotationMatrix, orientation);
+
+                // Convert radians to degrees
+                float pitch = (float) Math.toDegrees(orientation[1]);
+                float roll = (float) Math.toDegrees(orientation[2]);
+
+                checkDeviceDirection(pitch, roll);
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // Not needed for this implementation
+    }
+
+    private void checkDeviceDirection(float pitch, float roll) {
+        boolean isMatching = false;
+
+        // Normalize angles to 0-360 range
+        pitch = (pitch + 360) % 360;
+        roll = (roll + 360) % 360;
+
+        switch(currentTargetDirection) {
+            case 0: // Up (portrait)
+                isMatching = (pitch > 330 || pitch < 30) && (roll > 330 || roll < 30);
+                break;
+            case 1: // Right (landscape right)
+                isMatching = (roll > 60 && roll < 120);
+                break;
+            case 2: // Down (upside down)
+                // More reliable upside down detection
+                isMatching = (pitch > 150 && pitch < 210);
+                break;
+            case 3: // Left (landscape left)
+                isMatching = (roll > 240 && roll < 300); // Equivalent to -60 to -120
+                break;
+        }
+
+        if (isMatching) {
+            if (!isDirectionMatched) {
+                directionMatchStartTime = System.currentTimeMillis();
+                isDirectionMatched = true;
+            } else {
+                long holdTime = System.currentTimeMillis() - directionMatchStartTime;
+                updateTimerText(holdTime);
+
+                if (holdTime >= 500) { // 0.5 seconds
+                    onDirectionMatchSuccess();
+                }
+            }
+        } else {
+            isDirectionMatched = false;
+            updateTimerText(0);
+        }
+    }
+
+    private void onDirectionMatchSuccess() {
+        // Reward the player
+        addPoint(100);
+
+        // Show feedback
+        Toast.makeText(getContext(), "Direction matched! +100 points", Toast.LENGTH_SHORT).show();
+
+        // Set new random direction
+        setNewRandomDirection();
+    }
+
+    private void setNewRandomDirection() {
+        int randomIndex = (int)(Math.random() * DIRECTIONS.length);
+        currentTargetDirection = DIRECTIONS[randomIndex];
+
+        directionIndicator.setImageResource(DIRECTION_ICONS[currentTargetDirection]);
+        directionText.setText(DIRECTION_NAMES[currentTargetDirection]);
+        updateTimerText(0);
+
+        isDirectionMatched = false;
+    }
+
+    private void startTimer() {
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (isDirectionMatched) {
+                    long holdTime = System.currentTimeMillis() - directionMatchStartTime;
+                    updateTimerText(holdTime);
+                }
+                timerHandler.postDelayed(this, 50); // Update every 50ms
+            }
+        };
+        timerHandler.post(timerRunnable);
+    }
+
+    private void stopTimer() {
+        timerHandler.removeCallbacks(timerRunnable);
+    }
+
+    private void updateTimerText(long holdTime) {
+        float seconds = holdTime / 1000f;
+        String timerString = String.format("%.1fs / 0.5s", seconds);
+        timerText.setText(timerString);
+
+        // Change color based on progress (optional)
+        if (holdTime >= 500) {
+            timerText.setTextColor(getResources().getColor(R.color.green));
+        } else {
+            timerText.setTextColor(getResources().getColor(R.color.white));
+        }
+    }
+    // gyro?
 }

@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -42,9 +43,6 @@ public class MainActivity extends AppCompatActivity {
     // Tikimybė kiekvienam fonui (sumos turėtų būti 100)
     // Tikimybės, kad fonas pasirodys: 7 fonai, pvz., 10%, 20%, 15%, 5%, 10%, 25%, 15%
     int[] probabilities = {20, 20, 20, 1, 5, 10, 1};
-
-
-
     private int currentBackgroundIndex = 0;
     private int[] backgrounds = {
             R.drawable.menu_background_1,
@@ -55,8 +53,6 @@ public class MainActivity extends AppCompatActivity {
             R.drawable.menu_background_6,
             R.drawable.menu_background_7
     };
-
-
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         shakeDetector = new ShakeDetector();
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         shakeDetector.setOnShakeListener(() -> {
             // Generuojame atsitiktinį skaičių nuo 0 iki 100
@@ -184,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         }
     }
-
     // This method will insert default upgrades into the database if they don't already exist
     public void initializeUpgradesIfNeeded(AppDatabase db) {
         new Thread(() -> {
@@ -226,8 +221,6 @@ public class MainActivity extends AppCompatActivity {
         if (playFragment != null) {
             playFragment.updateScore(0);
         }
-
-
     }
     public void setAdminStatus(long profileId, boolean isAdmin) {
         new Thread(() -> {
@@ -242,16 +235,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
-
     @Override
     protected void onResume() {
         super.onResume();
         sensorManager.registerListener(shakeDetector, accelerometer, SensorManager.SENSOR_DELAY_UI);
     }
-
     @Override
     protected void onPause() {
         sensorManager.unregisterListener(shakeDetector);
         super.onPause();
+    }
+
+    public RebirthFragment getRebirthFragment() {
+        return rebirthFragment;
     }
 }

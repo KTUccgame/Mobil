@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:id="@+id/play_fragment_root">
 
-    <!-- Pavyzdžiui, fono paveikslėlis -->
     <ImageView
         android:id="@+id/background_image"
         android:layout_width="match_parent"
@@ -14,7 +13,6 @@
         android:scaleType="centerCrop"
         android:src="@drawable/grass_background" />
 
-    <!-- Tekstas arba statuso informacija -->
     <TextView
         android:id="@+id/textview"
         android:layout_width="wrap_content"
@@ -38,7 +36,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textview" />
 
-    <!-- Mygtukas, kuris aktyvuos veiksmą -->
     <ImageButton
         android:id="@+id/button"
         android:layout_width="100dp"
@@ -51,5 +48,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/gyroComponent"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="128dp"
+        android:layout_marginBottom="128dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/direction_indicator"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/gyro_arrow_up" />
+
+        <TextView
+            android:id="@+id/direction_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Tilt UP"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/timer_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0.0s / 0.5s"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,4 +6,6 @@
     <color name="bg_upgrades">#00FF00</color> <!-- Žalia -->
     <color name="bg_rebirth">#0000FF</color> <!-- Mėlyna -->
     <color name="bg_settings">#FFFF00</color> <!-- Geltona -->
+    <color name="green">#FF4CAF50</color>
+    <color name="dark_background">#FF121212</color>
 </resources>
