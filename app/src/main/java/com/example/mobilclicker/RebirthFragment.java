@@ -1,9 +1,5 @@
 package com.example.mobilclicker;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 public class RebirthFragment extends Fragment {
     private int currentTowerType = 0; // 0=default, 1=gyro, 2=gold
@@ -26,6 +23,8 @@ public class RebirthFragment extends Fragment {
     private UpgradesFragment upgradesFragment;
     private int resetCount = 0;
 
+    private SharedViewModel sharedViewModel;
+
     public RebirthFragment() {
     }
 
@@ -33,6 +32,9 @@ public class RebirthFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_rebirth, container, false);
+
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
 
         if (getActivity() instanceof MainActivity) {
             mainActivity = (MainActivity) getActivity();
@@ -69,6 +71,7 @@ public class RebirthFragment extends Fragment {
         });
         shopButton1.setOnClickListener(v -> {
             currentTowerType = 0;
+            sharedViewModel.setCurrentTowerType(0);
             updateAllButtons();
         });
         shopButton3.setOnClickListener(v -> {
@@ -77,10 +80,13 @@ public class RebirthFragment extends Fragment {
                     playFragment.set_score_2(playFragment.get_score_2() - towerPurchasePrices[2]);
                     towerUnlocked[1] = true;
                     currentTowerType = 1;
+                    sharedViewModel.setCurrentTowerType(1);
                     updateAllButtons();
                 }
             } else {
                 currentTowerType = 1;
+
+                sharedViewModel.setCurrentTowerType(1);
                 updateAllButtons();
             }
         });
@@ -90,10 +96,12 @@ public class RebirthFragment extends Fragment {
                     playFragment.set_score_2(playFragment.get_score_2() - towerPurchasePrices[4]);
                     towerUnlocked[2] = true;
                     currentTowerType = 2;
+                    sharedViewModel.setCurrentTowerType(2);
                     updateAllButtons();
                 }
             } else {
                 currentTowerType = 2;
+                sharedViewModel.setCurrentTowerType(2);
                 updateAllButtons();
             }
         });
