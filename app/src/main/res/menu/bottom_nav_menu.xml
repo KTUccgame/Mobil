@@ -21,6 +21,13 @@
         tools:ignore="MenuTitle" />
 
 
+    <item
+        android:id="@+id/nav_color_game"
+        android:icon="@drawable/ic_color_game"
+        tools:ignore="MenuTitle" />
+
+
+
     <!-- Settings -->
     <item
         android:id="@+id/nav_settings"

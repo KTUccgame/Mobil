@@ -25,13 +25,16 @@ import java.util.Random;
 
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
     boolean isUser = true;
     public long currentProfileId = 1;
     private UpgradesFragment upgradesFragment;
     private RebirthFragment rebirthFragment;
     private PlayFragment playFragment;
+    private CameraColorFragment cameraColorFragment;
+
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private ShakeDetector shakeDetector;
@@ -136,12 +139,11 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } else if (itemId == R.id.nav_rebirth) {
-                Log.i("debug", "clicked on Rebirth tab");
                 if (rebirthFragment == null) {
                     rebirthFragment = new RebirthFragment();
-                    rebirthFragment.setUpgradesFragment(upgradesFragment);
-                    rebirthFragment.setPlayFragment(playFragment);
                 }
+                rebirthFragment.setUpgradesFragment(upgradesFragment);
+                rebirthFragment.setPlayFragment(playFragment);
                 selectedFragment = rebirthFragment;
                 // ANIMACIJA ant nav_rebirth mygtuko
                 View navView = bottomNavigationView.findViewById(R.id.nav_rebirth);
@@ -161,6 +163,17 @@ public class MainActivity extends AppCompatActivity {
                 navView.startAnimation(set);
 
             }
+            else if (itemId == R.id.nav_color_game) {
+                Log.i("debug", "clicked on color game");
+                if (cameraColorFragment == null) {
+                    cameraColorFragment = new CameraColorFragment();
+                }
+                selectedFragment = cameraColorFragment;
+
+                // Papildoma animacija, jei nori
+                View navView = bottomNavigationView.findViewById(R.id.nav_color_game);
+            }
+
 
             if (selectedFragment != null) {
                 fragmentManager.beginTransaction()
@@ -249,4 +262,9 @@ public class MainActivity extends AppCompatActivity {
     public RebirthFragment getRebirthFragment() {
         return rebirthFragment;
     }
+
+
+
+
+
 }

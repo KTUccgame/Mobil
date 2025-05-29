@@ -15,6 +15,7 @@ public class DatabaseInfoActivity extends AppCompatActivity {
 
     private TextView databaseInfoTextView;
     private SearchView searchView;
+
     private List<Upgrade> allUpgrades; // Visi duomenys atmintyje
 
     @Override

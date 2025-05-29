@@ -4,14 +4,18 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,14 +32,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayFragment extends Fragment implements SensorEventListener {
+public class PlayFragment extends Fragment implements SensorEventListener{
     private TextView _textview;
     private ImageButton _button;
     private int _score = 0;
+    private float initialScore = 0f;
+    private float targetDistance = 0f;
+    private String currentPowerUpName = null;
+    private SharedViewModel sharedViewModel;
+
+
     private double _score_2 = 0;
     private float clickMultiplier = 1;
     private int clickpower = 1;
@@ -54,6 +68,9 @@ public class PlayFragment extends Fragment implements SensorEventListener {
     // gyro?
     private LinearLayout gyroComponent;
     private MainActivity mainActivity;
+
+    private CountDownTimer countDownTimer;
+    private static final long TRACKING_DURATION_MS = 30_000;
     public int towerType = 0; // 0 default, 1 gyro, 2 gold
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -70,6 +87,20 @@ public class PlayFragment extends Fragment implements SensorEventListener {
     private boolean isDirectionMatched = false;
     private Handler timerHandler = new Handler();
     private Runnable timerRunnable;
+
+    private ProgressBar powerUpProgressBar;
+    private TextView powerUpNameText;
+
+
+
+    private TextView trackingText;
+    private ProgressBar trackingProgressBar;
+
+    private float currentDistance;
+    private FusedLocationProviderClient fusedLocationClient;
+
+    private float totalDistanceTravelled = 0f;
+    private Location lastLocation;
 
     private static final int[] DIRECTIONS = {
             0, // up
@@ -109,11 +140,41 @@ public class PlayFragment extends Fragment implements SensorEventListener {
         _textview = view.findViewById(R.id.textview);
         _button = view.findViewById(R.id.button);
 
+        powerUpProgressBar = view.findViewById(R.id.powerUpProgressBar);
+        powerUpNameText = view.findViewById(R.id.powerUpNameText);
+
+        startScoreProgressUpdater();
+
         ImageView backgroundImage = view.findViewById(R.id.background_image);  // Rasti ImageView su id background_image
         //gyro?
         directionIndicator = view.findViewById(R.id.direction_indicator);
         directionText = view.findViewById(R.id.direction_text);
         timerText = view.findViewById(R.id.timer_text);
+
+        ImageButton worldMapBUtton = view.findViewById(R.id.world_map_button);
+        worldMapBUtton.setOnClickListener(v -> {
+            GameMapFragment gameMapFragment = new GameMapFragment();
+
+            requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,gameMapFragment).addToBackStack(null).commit();
+        });
+        //Kitu fragmentu stebetojas
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
+        sharedViewModel.getCurrentTowerType().observe(getViewLifecycleOwner(), towerType ->{
+            updateTowerIcon(towerType);
+        });
+
+        sharedViewModel.getTotalScore().observe(getViewLifecycleOwner(), newScore -> {
+            if (newScore != null) {
+                addPoint(newScore);
+            }
+        });
+
+
+
+
+
+
 
         // Initialize sensor manager
         sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
@@ -150,6 +211,7 @@ public class PlayFragment extends Fragment implements SensorEventListener {
             }
             return true;
         });
+
         _db = AppActivity.getDatabase();
         _upgradeDAO = _db.upgradeDAO();
         _db2 = AppActivity.getDatabase2();
@@ -231,6 +293,7 @@ public class PlayFragment extends Fragment implements SensorEventListener {
 
     @Override
     public void onResume() {
+        refreshScore();
         isTriplePurchased = false;
         super.onResume();
         loadClickPowerFromDatabase();
@@ -285,6 +348,32 @@ public class PlayFragment extends Fragment implements SensorEventListener {
             sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_GAME);
         }
         startTimer();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        String powerUpName = prefs.getString("selectedPowerUpName", null);
+        float distance = prefs.getFloat("selectedPowerUpDistance", 0f);
+
+        if (powerUpName != null) {
+            currentPowerUpName = powerUpName;
+            targetDistance = distance;
+            String prefix = "Unlock Progress: ";
+            powerUpNameText.setText(prefix + currentPowerUpName);
+            powerUpNameText.setVisibility(View.VISIBLE);
+            powerUpProgressBar.setVisibility(View.VISIBLE);
+
+            // Užfiksuojam _score reikšmę tą momentą, kai pasirinkome power-up,
+            // kad progress skaičiuotume nuo tada
+            initialScore = _score;
+
+            prefs.edit().remove("selectedPowerUpName").remove("selectedPowerUpDistance").apply();
+        }
+    }
+
+    private void updatePowerUpUI(String powerUpName, float distance) {
+
+        int progressValue = Math.min((int) (distance / 10), 100);
+        powerUpProgressBar.setProgress(progressValue);
+
     }
 
 
@@ -754,4 +843,67 @@ public class PlayFragment extends Fragment implements SensorEventListener {
         }
     }
     // gyro?
+
+    private void updateTowerIcon(int towerType) {
+        switch (towerType) {
+            case 0:
+                _button.setImageResource(R.drawable.tower1);
+                break;
+            case 1:
+                _button.setImageResource(R.drawable.towergyro);
+                break;
+            case 2:
+                _button.setImageResource(R.drawable.towergold);
+                break;
+        }
+    }
+
+
+    private void startScoreProgressUpdater() {
+        final android.os.Handler handler = new android.os.Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                updateProgressBar();
+                handler.postDelayed(this, 1000);
+            }
+        };
+        handler.post(runnable);
+    }
+
+    private void updateProgressBar() {
+        if (currentPowerUpName == null || targetDistance <= 0) {
+            powerUpProgressBar.setProgress(0);
+            return;
+        }
+
+
+        float progressScore = _score - initialScore;
+
+        int progress = (int) ((progressScore / targetDistance) * 100);
+        if (progress > 100) progress = 100;
+        if (progress < 0) progress = 0;
+
+        powerUpProgressBar.setProgress(progress);
+
+        if (progressScore >= targetDistance) {
+            onPowerUpReached();
+
+            // Resetinam, kad galėtume sekti kitą power-up
+            currentPowerUpName = null;
+            targetDistance = 0;
+            initialScore = 0;
+        }
+    }
+
+    private void onPowerUpReached() {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() ->
+                    Toast.makeText(getActivity(), "Pasiekei power-up: " + currentPowerUpName, Toast.LENGTH_SHORT).show()
+            );
+        }
+    }
+
+
+
 }
