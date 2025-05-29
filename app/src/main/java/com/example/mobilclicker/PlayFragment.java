@@ -43,7 +43,7 @@ import java.util.List;
 public class PlayFragment extends Fragment implements SensorEventListener{
     private TextView _textview;
     private ImageButton _button;
-    private int _score = 0;
+    private int _score = 10000;
     private float initialScore = 0f;
     private float targetDistance = 0f;
     private String currentPowerUpName = null;
@@ -318,12 +318,12 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             for (Upgrade upgrade : upgrades) {
                 if ("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() > 0) {
                     isEnemySpawnerPurchased = true;
-                    spawnDelay=5000;
+                    spawnDelay=500;
                     if("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() == 2){
-                      spawnDelay= 1500;
+                      spawnDelay= 250;
                     }
                     if("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() == 3){
-                        spawnDelay= 500;
+                        spawnDelay= 100;
                     }
                 }
                 if ("auto_shot".equals(upgrade.getId()) && upgrade.getAmount() > 0){
@@ -373,15 +373,12 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             prefs.edit().remove("selectedPowerUpName").remove("selectedPowerUpDistance").apply();
         }
     }
-
     private void updatePowerUpUI(String powerUpName, float distance) {
 
         int progressValue = Math.min((int) (distance / 10), 100);
         powerUpProgressBar.setProgress(progressValue);
 
     }
-
-
     @Override
     public void onPause() {
         super.onPause();
@@ -431,7 +428,6 @@ public class PlayFragment extends Fragment implements SensorEventListener{
     public void increaseClickPower() {
         clickpower++;
     }
-
     public void setCurrentProfileId(long id) {
         currentProfileId = id;
     }
@@ -563,6 +559,16 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         }
         enemyList.remove(enemy); // Pašaliname priešą iš sąrašo
     }
+
+    private void removeEnemy2(ImageView enemy) {
+        ViewGroup parent = (ViewGroup) enemy.getParent();
+        if (parent != null) {
+            parent.removeView(enemy);
+            enemyCount--;
+            updateEnemyCountDisplay();
+        }
+        //enemyList.remove(enemy); // Pašaliname priešą iš sąrašo
+    }
     private Handler handler = new Handler();
     private long spawnDelay = 5000; // Pradinis atsiradimo greitis (2000ms arba 2 sekundės)
     private int additionalEnemies = 0; // Papildomų priešų skaičius
@@ -596,7 +602,7 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         handler.removeCallbacks(enemySpawnTask);
     }
     private void startAutomaticShooting() {
-        shootHandler.postDelayed(shootTask, 50); // Pradeda automatinį šaudymą kas 1 sekundę
+        shootHandler.postDelayed(shootTask, 100); // Pradeda automatinį šaudymą kas 1 sekundę
     }
     private void stopAutomaticShooting() {
         shootHandler.removeCallbacks(shootTask); // Sustabdo automatinius šūvius
@@ -679,7 +685,7 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         public void run() {
             checkIfEnemyOnLaser();
             //shootAtEnemy(); // Šauna į artimiausią priešą
-            shootHandler.postDelayed(this, 50); // Šaudo kas 1 sekundę
+            shootHandler.postDelayed(this, 100); // Šaudo kas 1 sekundę
         }
     };
     private void loadClickPowerFromDatabase() {
@@ -735,6 +741,8 @@ public class PlayFragment extends Fragment implements SensorEventListener{
                 compassArrow.setRotation(-azimuthInDegrees);
                 //checkIfEnemyOnLaser();
                 // method to check if enemy is on same axis?
+                // delay ?
+
             }
         }
     }
@@ -754,10 +762,10 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             SensorManager.getOrientation(rotationMatrix, orientation);
             float azimuthInDegrees = (float) (Math.toDegrees(orientation[0]) + 360) % 360;
 
-            float angleTolerance = 3f; // degrees
+            float angleTolerance = 8f; // degrees
             if (!enemyList.isEmpty())
             {
-                for (ImageView enemy : enemyList) {
+                for  (ImageView enemy : enemyList) {
                     float enemyX = enemy.getX() + enemy.getWidth() / 2;
                     float enemyY = enemy.getY() + enemy.getHeight() / 2;
 
@@ -779,28 +787,28 @@ public class PlayFragment extends Fragment implements SensorEventListener{
                             Log.i("w", "LASER ON ENEMY");
                             //enemyList.remove(enemy);
                             //method to queue enemy deletion after 0.5 s
-                            destroyEnemySoon(enemy);
-                            removeEnemy(enemy);
-                            addPoint();
-                            refreshScore();
+                            //destroyEnemySoon(enemy);
+                            //removeEnemy2(enemy);
+                            //addPoint();
+                            //refreshScore();
+
 
                         }
                     }
                 }
         }
         }
-/*
+
         if (targetEnemy != null) {
             System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaa" + targetEnemy);
             if (targetEnemy.getParent() != null) {
-                removeEnemy(targetEnemy);
-                addPoint();
-                refreshScore();
+              destroyEnemySoon(targetEnemy);
+
             }
         } else {
             System.out.println("11346346");
         }
-        */
+
     }
     public void destroyEnemySoon(ImageView enemy)
     {
@@ -812,7 +820,6 @@ public class PlayFragment extends Fragment implements SensorEventListener{
                 removeEnemy(enemy);
                 addPoint();
                 refreshScore();
-                // This block will run after 100ms
             }
         }, 100);
 
