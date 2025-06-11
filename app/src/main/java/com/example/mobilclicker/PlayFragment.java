@@ -192,7 +192,9 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         {
             if ( rebirthFragment.getCurrentTowerType() == 1 )
             {
-                gyroComponent.setVisibility(View.VISIBLE);
+                //gyroComponent.setVisibility(View.VISIBLE);
+                gyroComponent.setVisibility(View.GONE);
+                compassArrow.setVisibility(View.VISIBLE);
                 // show sensor manager components
                 setNewRandomDirection();
             }
@@ -200,6 +202,7 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         else
         {
             gyroComponent.setVisibility(View.GONE);
+            compassArrow.setVisibility(View.GONE);
             // hide sensor manager components
         }
         //gyro?
@@ -339,8 +342,11 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             if (isEnemySpawnerPurchased) {
                 startEnemySpawnLoop();
             }
-            if (isShootingPurchased) {
+            if (isShootingPurchased && towerType != 1) {
                 startAutomaticShooting();
+            }
+            if (isShootingPurchased && towerType == 1) {
+                startAutomaticShooting2();
             }
 
 
@@ -602,7 +608,10 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         handler.removeCallbacks(enemySpawnTask);
     }
     private void startAutomaticShooting() {
-        shootHandler.postDelayed(shootTask, 100); // Pradeda automatinį šaudymą kas 1 sekundę
+        shootHandler.postDelayed(shootTask, 1000); // Pradeda automatinį šaudymą kas 1 sekundę
+    }
+    private void startAutomaticShooting2() {
+        shootHandler.postDelayed(shootTask2, 100); // laserbeam shooter
     }
     private void stopAutomaticShooting() {
         shootHandler.removeCallbacks(shootTask); // Sustabdo automatinius šūvius
@@ -683,9 +692,17 @@ public class PlayFragment extends Fragment implements SensorEventListener{
     private Runnable shootTask = new Runnable() {
         @Override
         public void run() {
+            //checkIfEnemyOnLaser();
+            shootAtEnemy(); // Šauna į artimiausią priešą
+            shootHandler.postDelayed(this, 1000); // Šaudo kas 1 sekundę
+        }
+    };
+    private Runnable shootTask2 = new Runnable() {
+        @Override
+        public void run() {
             checkIfEnemyOnLaser();
             //shootAtEnemy(); // Šauna į artimiausią priešą
-            shootHandler.postDelayed(this, 100); // Šaudo kas 1 sekundę
+            shootHandler.postDelayed(this, 100); // laserbeam delay
         }
     };
     private void loadClickPowerFromDatabase() {
@@ -798,7 +815,6 @@ public class PlayFragment extends Fragment implements SensorEventListener{
                 }
         }
         }
-
         if (targetEnemy != null) {
             System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaa" + targetEnemy);
             if (targetEnemy.getParent() != null) {
