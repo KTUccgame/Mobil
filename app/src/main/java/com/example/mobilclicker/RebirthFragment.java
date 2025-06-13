@@ -202,14 +202,14 @@ public class RebirthFragment extends Fragment {
             double newTotal = currentScore2 + potentialGain;
 
             previewText = "Reset Count: " + resetCount +
-                    " \nCurrent score_2: " + String.format("%.2f", currentScore2) +
+                    " \nCurrent tokens: " + String.format("%.2f", currentScore2) +
                     "\nPotential gain: " + String.format("%.2f", potentialGain) +
                     "\nNew total: " + String.format("%.2f", newTotal) +
                     "\n\n(Need 1000 points to reset)";
         } else {
             double neededPoints = 1000 - currentScore;
             previewText = "Reset Count: " + resetCount +
-                    "\nCurrent score_2: " + String.format("%.2f", currentScore2) +
+                    "\nCurrent tokens: " + String.format("%.2f", currentScore2) +
                     "\nNeed " + String.format("%.0f", neededPoints) + " more points to reset" +
                     "\n\nPotential gain at 1000: +1.00 tokens";
         }

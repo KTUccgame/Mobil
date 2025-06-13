@@ -15,6 +15,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,7 +43,7 @@ import java.util.List;
 public class PlayFragment extends Fragment implements SensorEventListener{
     private TextView _textview;
     private ImageButton _button;
-    private int _score = 0;
+    private int _score = 10000;
     private float initialScore = 0f;
     private float targetDistance = 0f;
     private String currentPowerUpName = null;
@@ -72,6 +73,9 @@ public class PlayFragment extends Fragment implements SensorEventListener{
     private CountDownTimer countDownTimer;
     private static final long TRACKING_DURATION_MS = 30_000;
     public int towerType = 0; // 0 default, 1 gyro, 2 gold
+    private ImageView compassArrow;
+    private float[] rotationMatrix = new float[9];
+    private float[] orientation = new float[3];
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
@@ -150,6 +154,7 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         directionIndicator = view.findViewById(R.id.direction_indicator);
         directionText = view.findViewById(R.id.direction_text);
         timerText = view.findViewById(R.id.timer_text);
+        compassArrow = view.findViewById(R.id.compass_arrow);
 
         ImageButton worldMapBUtton = view.findViewById(R.id.world_map_button);
         worldMapBUtton.setOnClickListener(v -> {
@@ -187,7 +192,9 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         {
             if ( rebirthFragment.getCurrentTowerType() == 1 )
             {
-                gyroComponent.setVisibility(View.VISIBLE);
+                //gyroComponent.setVisibility(View.VISIBLE);
+                gyroComponent.setVisibility(View.GONE);
+                compassArrow.setVisibility(View.VISIBLE);
                 // show sensor manager components
                 setNewRandomDirection();
             }
@@ -195,6 +202,7 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         else
         {
             gyroComponent.setVisibility(View.GONE);
+            compassArrow.setVisibility(View.GONE);
             // hide sensor manager components
         }
         //gyro?
@@ -313,12 +321,12 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             for (Upgrade upgrade : upgrades) {
                 if ("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() > 0) {
                     isEnemySpawnerPurchased = true;
-                    spawnDelay=5000;
+                    spawnDelay=500;
                     if("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() == 2){
-                      spawnDelay= 1500;
+                      spawnDelay= 250;
                     }
                     if("enemy_spawner".equals(upgrade.getId()) && upgrade.getAmount() == 3){
-                        spawnDelay= 500;
+                        spawnDelay= 100;
                     }
                 }
                 if ("auto_shot".equals(upgrade.getId()) && upgrade.getAmount() > 0){
@@ -334,8 +342,11 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             if (isEnemySpawnerPurchased) {
                 startEnemySpawnLoop();
             }
-            if (isShootingPurchased) {
+            if (isShootingPurchased && towerType != 1) {
                 startAutomaticShooting();
+            }
+            if (isShootingPurchased && towerType == 1) {
+                startAutomaticShooting2();
             }
 
 
@@ -368,15 +379,12 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             prefs.edit().remove("selectedPowerUpName").remove("selectedPowerUpDistance").apply();
         }
     }
-
     private void updatePowerUpUI(String powerUpName, float distance) {
 
         int progressValue = Math.min((int) (distance / 10), 100);
         powerUpProgressBar.setProgress(progressValue);
 
     }
-
-
     @Override
     public void onPause() {
         super.onPause();
@@ -426,7 +434,6 @@ public class PlayFragment extends Fragment implements SensorEventListener{
     public void increaseClickPower() {
         clickpower++;
     }
-
     public void setCurrentProfileId(long id) {
         currentProfileId = id;
     }
@@ -558,6 +565,16 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         }
         enemyList.remove(enemy); // Pašaliname priešą iš sąrašo
     }
+
+    private void removeEnemy2(ImageView enemy) {
+        ViewGroup parent = (ViewGroup) enemy.getParent();
+        if (parent != null) {
+            parent.removeView(enemy);
+            enemyCount--;
+            updateEnemyCountDisplay();
+        }
+        //enemyList.remove(enemy); // Pašaliname priešą iš sąrašo
+    }
     private Handler handler = new Handler();
     private long spawnDelay = 5000; // Pradinis atsiradimo greitis (2000ms arba 2 sekundės)
     private int additionalEnemies = 0; // Papildomų priešų skaičius
@@ -582,30 +599,23 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             }
         }
     };
-
-
     private void startEnemySpawnLoop() {
         if (isResumed()) { // Patikriname, ar fragmentas yra aktyvus
             handler.post(enemySpawnTask);
         }
     }
-
     private void stopEnemySpawnLoop() {
         handler.removeCallbacks(enemySpawnTask);
     }
-
-
     private void startAutomaticShooting() {
         shootHandler.postDelayed(shootTask, 1000); // Pradeda automatinį šaudymą kas 1 sekundę
     }
-
+    private void startAutomaticShooting2() {
+        shootHandler.postDelayed(shootTask2, 100); // laserbeam shooter
+    }
     private void stopAutomaticShooting() {
         shootHandler.removeCallbacks(shootTask); // Sustabdo automatinius šūvius
     }
-
-
-
-    // Kulkos šaudymo logika
     public void shootAtEnemy() {
         ViewGroup rootLayout = requireActivity().findViewById(R.id.play_fragment_root);
         if (rootLayout == null) return;
@@ -656,7 +666,6 @@ public class PlayFragment extends Fragment implements SensorEventListener{
 
         animator.start();
     }
-
     // Raskite artimiausią priešą
     @Nullable
     private ImageView findClosestEnemy() {
@@ -678,18 +687,24 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         }
         return closest;
     }
-
-
     // Handler ir Runnable automatinio šaudymo funkcijoms
     private Handler shootHandler = new Handler();
     private Runnable shootTask = new Runnable() {
         @Override
         public void run() {
+            //checkIfEnemyOnLaser();
             shootAtEnemy(); // Šauna į artimiausią priešą
             shootHandler.postDelayed(this, 1000); // Šaudo kas 1 sekundę
         }
     };
-
+    private Runnable shootTask2 = new Runnable() {
+        @Override
+        public void run() {
+            checkIfEnemyOnLaser();
+            //shootAtEnemy(); // Šauna į artimiausią priešą
+            shootHandler.postDelayed(this, 100); // laserbeam delay
+        }
+    };
     private void loadClickPowerFromDatabase() {
         AppDatabase db = AppDatabase.getInstance(getContext());
         _upgradeDAO = db.upgradeDAO();
@@ -707,15 +722,12 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             });
         }).start();
     }
-
     public double get_score_2() {
         return _score_2;
     }
-
     public void set_score_2(double _score_2) {
         this._score_2 = _score_2;
     }
-
     // gyro?
 
     @Override
@@ -740,19 +752,101 @@ public class PlayFragment extends Fragment implements SensorEventListener{
                 float roll = (float) Math.toDegrees(orientation[2]);
 
                 checkDeviceDirection(pitch, roll);
+
+                float azimuthInRadians = orientation[0];
+                float azimuthInDegrees = (float)(Math.toDegrees(azimuthInRadians) + 360) % 360;
+                compassArrow.setRotation(-azimuthInDegrees);
+                //checkIfEnemyOnLaser();
+                // method to check if enemy is on same axis?
+                // delay ?
+
             }
         }
     }
+    public void checkIfEnemyOnLaser() {
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int screenHeight = getResources().getDisplayMetrics().heightPixels;
 
+        float centerX = screenWidth / 2f;
+        float centerY = screenHeight / 2f;
+
+        ImageView targetEnemy = null;
+        double minDistance = Double.MAX_VALUE;
+
+        float[] rotationMatrix = new float[9];
+        float[] orientation = new float[3];
+        if (SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer)) {
+            SensorManager.getOrientation(rotationMatrix, orientation);
+            float azimuthInDegrees = (float) (Math.toDegrees(orientation[0]) + 360) % 360;
+
+            float angleTolerance = 8f; // degrees
+            if (!enemyList.isEmpty())
+            {
+                for  (ImageView enemy : enemyList) {
+                    float enemyX = enemy.getX() + enemy.getWidth() / 2;
+                    float enemyY = enemy.getY() + enemy.getHeight() / 2;
+
+                    float dx = enemyX - centerX;
+                    float dy = enemyY - centerY;
+                    float angleToEnemy = (float) Math.toDegrees(Math.atan2(dy, dx));
+
+                    angleToEnemy = (360 - angleToEnemy + 90) % 360;
+                    float angleDifference = Math.abs(angleToEnemy - azimuthInDegrees);
+                    angleDifference = Math.min(angleDifference, 360 - angleDifference);
+
+                    if (angleDifference <= angleTolerance) {
+                        double distanceToCenter = Math.hypot(dx, dy);
+
+                        if (distanceToCenter < minDistance) {
+                            minDistance = distanceToCenter;
+                            targetEnemy = enemy;
+
+                            Log.i("w", "LASER ON ENEMY");
+                            //enemyList.remove(enemy);
+                            //method to queue enemy deletion after 0.5 s
+                            //destroyEnemySoon(enemy);
+                            //removeEnemy2(enemy);
+                            //addPoint();
+                            //refreshScore();
+
+
+                        }
+                    }
+                }
+        }
+        }
+        if (targetEnemy != null) {
+            System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaa" + targetEnemy);
+            if (targetEnemy.getParent() != null) {
+              destroyEnemySoon(targetEnemy);
+
+            }
+        } else {
+            System.out.println("11346346");
+        }
+
+    }
+    public void destroyEnemySoon(ImageView enemy)
+    {
+        final android.os.Handler handler = new android.os.Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                removeEnemy(enemy);
+                addPoint();
+                refreshScore();
+            }
+        }, 100);
+
+
+    }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Not needed for this implementation
     }
-
     private void checkDeviceDirection(float pitch, float roll) {
         boolean isMatching = false;
-
-        // Normalize angles to 0-360 range
         pitch = (pitch + 360) % 360;
         roll = (roll + 360) % 360;
 
@@ -768,7 +862,7 @@ public class PlayFragment extends Fragment implements SensorEventListener{
                 isMatching = (pitch > 150 && pitch < 210);
                 break;
             case 3: // Left (landscape left)
-                isMatching = (roll > 240 && roll < 300); // Equivalent to -60 to -120
+                isMatching = (roll > 240 && roll < 300); // -60 to -120
                 break;
         }
 
