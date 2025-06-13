@@ -162,10 +162,6 @@ public class CameraColorFragment extends Fragment {
         }
     }
 
-
-
-
-
     private void checkPermissionsAndOpenCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -276,7 +272,7 @@ public class CameraColorFragment extends Fragment {
                     int dominantColor = getDominantColor(bitmap);
 
                     requireActivity().runOnUiThread(() -> {
-                        if (isColorSimilar(dominantColor, targetColor)) {
+                        if (crosshair.getVisibility() == View.VISIBLE) {
                             score += (int)(10 * multiplier);
                             multiplier += 0.2f;
                             roundTime = Math.max(minRoundTime, roundTime - 500);
@@ -293,6 +289,7 @@ public class CameraColorFragment extends Fragment {
                         }
                         updateUI();
                     });
+
                 }
             }, backgroundHandler);
 
@@ -354,7 +351,7 @@ public class CameraColorFragment extends Fragment {
     private boolean isColorSimilar(int c1, int c2) {
         int r1 = Color.red(c1), g1 = Color.green(c1), b1 = Color.blue(c1);
         int r2 = Color.red(c2), g2 = Color.green(c2), b2 = Color.blue(c2);
-        int threshold = 50;
+        int threshold = 20;
         return Math.abs(r1 - r2) < threshold &&
                 Math.abs(g1 - g2) < threshold &&
                 Math.abs(b1 - b2) < threshold;
