@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -13,117 +14,131 @@
         android:layout_height="wrap_content"
         android:text="Rebirth"
         android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.038"
+        app:layout_constraintBottom_toTopOf="@+id/reset_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.1"
         tools:ignore="HardcodedText" />
 
     <Button
         android:id="@+id/reset_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Reset Game"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="100dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_rebirth"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        app:layout_constraintWidth_percent="0.6"/>
 
     <TextView
         android:id="@+id/rebirth_level_textbox"
-        android:layout_width="175dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="116dp"
-        android:layout_marginTop="60dp"
         android:text="Rebirth information"
         android:textSize="20sp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/reset_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/reset_button" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        app:layout_constraintWidth_percent="0.8" />
 
-    <LinearLayout
-        android:layout_width="256dp"
+    <!-- Rebirth buttons group -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_top"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="76dp"
-        android:layout_marginBottom="88dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.45" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_vertical_middle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintGuide_percent="0.5" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+    <!-- First Row -->
+    <Button
+        android:id="@+id/rebirth_option_one"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Default"
+        android:drawableRight="@drawable/tower1_small"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical|start"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintTop_toBottomOf="@id/rebirth_level_textbox"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_middle"
+        android:layout_marginTop="24dp"
+        app:layout_constraintWidth_percent="0.45"/>
 
-            <Button
-                android:id="@+id/rebirth_option_one"
-                android:layout_width="128dp"
-                android:layout_height="64dp"
-                android:drawableRight="@drawable/tower1_small"
-                android:drawablePadding="8dp"
-                android:drawableTint="@null"
-                android:gravity="center_vertical|start"
-                android:paddingStart="16dp"
-                android:paddingEnd="8dp"
-                android:singleLine="true"
-                android:text="Default" />
-            <Button
-                android:id="@+id/rebirth_option_two"
-                android:layout_width="128dp"
-                android:layout_height="64dp"
-                android:text="Button" />
-        </LinearLayout>
+    <Button
+        android:id="@+id/rebirth_option_two"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        app:layout_constraintTop_toTopOf="@id/rebirth_option_one"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical_middle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.45"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+    <!-- Second Row -->
+    <Button
+        android:id="@+id/rebirth_option_three"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Gyro 2"
+        android:drawableRight="@drawable/towergyro_small"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical|start"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintTop_toBottomOf="@id/rebirth_option_one"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_middle"
+        android:layout_marginTop="16dp"
+        app:layout_constraintWidth_percent="0.45"/>
 
-            <Button
-                android:id="@+id/rebirth_option_three"
-                android:layout_width="128dp"
-                android:layout_height="64dp"
-                android:drawableRight="@drawable/towergyro_small"
-                android:drawablePadding="8dp"
-                android:drawableTint="@null"
-                android:gravity="center_vertical|start"
-                android:paddingStart="16dp"
-                android:paddingEnd="8dp"
-                android:singleLine="true"
-                android:text="Gyro 2" />
-            <Button
-                android:id="@+id/rebirth_option_four"
-                android:layout_width="128dp"
-                android:layout_height="64dp"
-                android:layout_weight="1"
-                android:text="Button" />
-        </LinearLayout>
+    <Button
+        android:id="@+id/rebirth_option_four"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        app:layout_constraintTop_toTopOf="@id/rebirth_option_three"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical_middle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.45"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+    <!-- Third Row -->
+    <Button
+        android:id="@+id/rebirth_option_five"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Gold 3"
+        android:drawableRight="@drawable/towergold_small"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical|start"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintTop_toBottomOf="@id/rebirth_option_three"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_middle"
+        android:layout_marginTop="16dp"
+        app:layout_constraintWidth_percent="0.45"/>
 
-            <Button
-                android:id="@+id/rebirth_option_five"
-                android:layout_width="128dp"
-                android:layout_height="64dp"
-                android:drawableRight="@drawable/towergold_small"
-                android:drawablePadding="8dp"
-                android:drawableTint="@null"
-                android:gravity="center_vertical|start"
-                android:paddingStart="16dp"
-                android:paddingEnd="8dp"
-                android:singleLine="true"
-                android:text="Gold 3" />
-            <Button
-                android:id="@+id/rebirth_option_six"
-                android:layout_width="128dp"
-                android:layout_height="64dp"
-                android:layout_weight="1"
-                android:text="Button" />
-        </LinearLayout>
-    </LinearLayout>
+    <Button
+        android:id="@+id/rebirth_option_six"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        app:layout_constraintTop_toTopOf="@id/rebirth_option_five"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical_middle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.45"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
