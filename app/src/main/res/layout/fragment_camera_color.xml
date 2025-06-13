@@ -16,12 +16,14 @@
         android:background="#AA000000"
         android:layout_gravity="top">
 
-        <TextView android:id="@+id/colorPromptText"
+        <TextView
+            android:id="@+id/colorPromptText"
             android:text="Rask spalvą"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:layout_width="wrap_content" />
+
         <ImageView
             android:id="@+id/colorFeedbackIcon"
             android:layout_width="24dp"
@@ -30,14 +32,17 @@
             android:visibility="gone"
             android:contentDescription="Rezultatas" />
 
-        <TextView android:id="@+id/timerText"
+        <TextView
+            android:id="@+id/timerText"
             android:textColor="#FFFFFF"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
-        <TextView android:id="@+id/scoreText"
+            android:layout_width="wrap_content" />
+
+        <TextView
+            android:id="@+id/scoreText"
             android:textColor="#FFFFFF"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:layout_width="wrap_content" />
     </LinearLayout>
 
     <LinearLayout
@@ -53,11 +58,24 @@
             android:id="@+id/captureBtn"
             android:text="Fotografuoti"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:layout_width="wrap_content" />
+
         <Button
             android:id="@+id/endGameBtn"
             android:text="Baigti"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:layout_width="wrap_content" />
     </LinearLayout>
+
+    <!-- Pridėtas crosshair -->
+    <ImageView
+        android:id="@+id/crosshair"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="top|left"
+        android:visibility="gone"
+        android:src="@drawable/ic_crosshair"
+        android:contentDescription="Taikinys" />
+
+
 </FrameLayout>

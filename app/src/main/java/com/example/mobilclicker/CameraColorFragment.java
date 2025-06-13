@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Size;
 import android.view.*;
 import android.widget.Button;
@@ -54,6 +55,11 @@ public class CameraColorFragment extends Fragment {
 
     private int score = 0;
 
+    private ImageView crosshair;
+
+    private Handler colorCheckHandler;
+    private Runnable colorCheckRunnable;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -66,6 +72,9 @@ public class CameraColorFragment extends Fragment {
         captureButton = view.findViewById(R.id.captureBtn);
         endButton = view.findViewById(R.id.endGameBtn);
         colorFeedbackIcon = view.findViewById(R.id.colorFeedbackIcon);
+
+        crosshair = view.findViewById(R.id.crosshair);
+        crosshair.setVisibility(View.GONE); // iš pradžių nerodome
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -89,8 +98,73 @@ public class CameraColorFragment extends Fragment {
             navigateToPlayFragment();
         });
 
+        // paleidžiame fone periodiškai patikrinti spalvą
+        colorCheckHandler = new Handler(Looper.getMainLooper());
+        colorCheckRunnable = new Runnable() {
+            @Override
+            public void run() {
+                checkForTargetColor();
+                colorCheckHandler.postDelayed(this, 500); // kartoti kas 500ms
+            }
+        };
+        colorCheckHandler.post(colorCheckRunnable);
+
         return view;
     }
+
+    private void checkForTargetColor() {
+        if (!textureView.isAvailable() || !isGameRunning) {
+            crosshair.setVisibility(View.GONE);
+            return;
+        }
+
+        Bitmap bitmap = textureView.getBitmap();
+        if (bitmap == null) {
+            crosshair.setVisibility(View.GONE);
+            return;
+        }
+
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        int marginX = width / 10;
+        int marginY = height / 10;
+
+        int closestX = -1, closestY = -1;
+
+        outerLoop:
+        for (int y = marginY; y < height - marginY; y += 10) {
+            for (int x = marginX; x < width - marginX; x += 10) {
+                int pixelColor = bitmap.getPixel(x, y);
+                if (isColorSimilar(pixelColor, targetColor)) {
+                    closestX = x;
+                    closestY = y;
+                    break outerLoop;
+                }
+            }
+        }
+
+        if (closestX != -1 && closestY != -1) {
+            int textureWidth = textureView.getWidth();
+            int textureHeight = textureView.getHeight();
+
+            float scaleX = (float) textureWidth / width;
+            float scaleY = (float) textureHeight / height;
+
+            float crosshairX = closestX * scaleX - crosshair.getWidth() / 2f;
+            float crosshairY = closestY * scaleY - crosshair.getHeight() / 2f;
+
+            crosshair.setX(textureView.getX() + crosshairX);
+            crosshair.setY(textureView.getY() + crosshairY);
+            crosshair.setVisibility(View.VISIBLE);
+        } else {
+            crosshair.setVisibility(View.GONE);
+        }
+    }
+
+
+
+
 
     private void checkPermissionsAndOpenCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
@@ -213,7 +287,7 @@ public class CameraColorFragment extends Fragment {
 
                             startGameRound();
                         } else {
-                            colorFeedbackIcon.setImageResource(R.drawable.ic_cross_red);
+                            colorFeedbackIcon.setImageResource(R.drawable.ic_crosshair);
                             colorFeedbackIcon.setVisibility(View.VISIBLE);
                             colorFeedbackIcon.postDelayed(() -> colorFeedbackIcon.setVisibility(View.GONE), 1000);
                         }
@@ -323,6 +397,14 @@ public class CameraColorFragment extends Fragment {
             } else {
                 Toast.makeText(getContext(), "Reikalingas kameros leidimas", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (colorCheckHandler != null && colorCheckRunnable != null) {
+            colorCheckHandler.removeCallbacks(colorCheckRunnable);
         }
     }
 }
