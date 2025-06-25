@@ -174,7 +174,6 @@ public class MainActivity extends AppCompatActivity{
                 View navView = bottomNavigationView.findViewById(R.id.nav_color_game);
             }
 
-
             if (selectedFragment != null) {
                 fragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)

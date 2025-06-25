@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.hardware.Sensor;
@@ -18,10 +19,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,12 +44,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlayFragment extends Fragment implements SensorEventListener{
+
+    private SharedPreferences sharedPreferences;
     private TextView _textview;
     private ImageButton _button;
-    private int _score = 10000;
+    public int _score = 10000;
+    public int hp=1;
     private float initialScore = 0f;
     private float targetDistance = 0f;
     private String currentPowerUpName = null;
+    private long currenttime;
+    private long totaltime=0;
+    private String timeString;
     private SharedViewModel sharedViewModel;
 
 
@@ -95,8 +104,17 @@ public class PlayFragment extends Fragment implements SensorEventListener{
     private ProgressBar powerUpProgressBar;
     private TextView powerUpNameText;
 
+    private TextView hptest;
 
+    private ImageView peller;
+    private int screenWidth;
+    private int screenHeight;
+    private int imageWidth;
+    private int imageHeight;
 
+    private final float Sens = 5f;
+    private float posX = 0f;
+    private float posY = 0f;
     private TextView trackingText;
     private ProgressBar trackingProgressBar;
 
@@ -144,6 +162,24 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         _textview = view.findViewById(R.id.textview);
         _button = view.findViewById(R.id.button);
 
+        peller = view.findViewById(R.id.peller);
+
+        WindowManager wm = getActivity().getWindowManager();
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenWidth=size.x;
+        screenHeight=size.y;
+
+        peller.post(() ->{
+            imageWidth=peller.getWidth();
+            imageHeight=peller.getHeight();
+
+            posX=peller.getX();
+            posY=peller.getY();
+        });
+
+
         powerUpProgressBar = view.findViewById(R.id.powerUpProgressBar);
         powerUpNameText = view.findViewById(R.id.powerUpNameText);
 
@@ -162,6 +198,19 @@ public class PlayFragment extends Fragment implements SensorEventListener{
 
             requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,gameMapFragment).addToBackStack(null).commit();
         });
+
+        ImageButton statsButton = view.findViewById(R.id.stats_icon);
+        statsButton.setOnClickListener(v -> {
+            StatsFragment statsfragment = new StatsFragment();
+
+            Bundle bundle = new Bundle();
+            bundle.putInt("key",_score);
+            bundle.putString("tiem",timeString);
+            statsfragment.setArguments(bundle);
+
+            requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,statsfragment).addToBackStack(null).commit();
+        });
+
         //Kitu fragmentu stebetojas
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
@@ -304,6 +353,7 @@ public class PlayFragment extends Fragment implements SensorEventListener{
         refreshScore();
         isTriplePurchased = false;
         super.onResume();
+        startTime=System.currentTimeMillis();
         loadClickPowerFromDatabase();
         refreshScore(); // Grįžus į fragmentą, atnaujiname taškų skaičių
         if(enemyCount<0)
@@ -388,6 +438,14 @@ public class PlayFragment extends Fragment implements SensorEventListener{
     @Override
     public void onPause() {
         super.onPause();
+
+        currenttime=System.currentTimeMillis()-startTime;
+        totaltime=totaltime+currenttime;
+        long seconds = (totaltime / 1000) % 60;
+        long minutes = (totaltime / (1000 * 60)) % 60;
+        long hours = (totaltime / (1000 * 60 * 60));
+        timeString= String.format("%02d:%02d:%02d", hours, minutes, seconds);
+
         stopEnemySpawnLoop(); // Sustabdo priešų kūrimo uždelsimą
         stopAutomaticShooting(); // Sustabdo automatinį šaudymą
         //gyro!!
@@ -550,16 +608,51 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             float distance = (float) Math.hypot(targetX - currentX, targetY - currentY);
             if (distance < 10) { // Jei atstumas mažesnis nei 10px, pašaliname priešą
                 removeEnemy(enemy);
+                towerdamage(hp);
                 animator.cancel();
             }
         });
         animator.start();
     }
+
+    private void towerdamage(int hp){
+        if (hp>0){
+            hp=hp-1;
+        }
+        if (hp<=0){
+            stopEnemySpawnLoop();
+            _button.setBackgroundResource(R.drawable.towerexplode_animation);
+            AnimationDrawable towerAnimation = (AnimationDrawable) _button.getBackground();
+            _button.setImageDrawable(null);
+            towerAnimation.start();
+            stopAutomaticShooting();
+            if (enemyCount==0){
+                deathFragment Deathfragment = new deathFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt("key",_score);
+                bundle.putString("tiem",timeString);
+                Deathfragment.setArguments(bundle);
+                requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,Deathfragment).addToBackStack(null).commit();
+            }
+        }
+    }
+
     // Funkcija, kuri pašalina priešą iš ekrano ir sąrašo
     private void removeEnemy(ImageView enemy) {
         ViewGroup parent = (ViewGroup) enemy.getParent();
         if (parent != null) {
-            parent.removeView(enemy);
+            enemy.setBackgroundResource(R.drawable.mushroom_die_animation);
+            AnimationDrawable enemyAnimation = (AnimationDrawable) enemy.getBackground();
+            enemyAnimation.start();
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    parent.removeView(enemy);
+                }
+            };
+            Handler h = new Handler();
+            h.postDelayed(r,1000);
+
             enemyCount--;
             updateEnemyCountDisplay();
         }
@@ -739,6 +832,22 @@ public class PlayFragment extends Fragment implements SensorEventListener{
             System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.length);
             lastMagnetometerSet = true;
         }
+
+        if (event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
+            float accelX= event.values[0];
+            float accelY= event.values[1];
+            posX-=accelX*Sens;
+            posY+=accelY*Sens;
+
+            posX=Math.max(0,Math.min(posX,screenWidth-imageWidth));
+            posY=Math.max(0,Math.min(posY,screenHeight-imageHeight));
+
+            peller.setX(posX);
+            peller.setY(posY);
+        }
+
+
+
 
         if (lastAccelerometerSet && lastMagnetometerSet) {
             float[] rotationMatrix = new float[9];
